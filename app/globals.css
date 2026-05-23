@@ -25,16 +25,7 @@
 * { box-sizing: border-box; }
 
 body {
-  background: linear-gradient(160deg,
-    #4faed8 0%,
-    #72c6eb 10%,
-    #9dd8f3 25%,
-    #bce8fa 42%,
-    #d5f0fc 58%,
-    #b2e0f5 72%,
-    #84cceb 86%,
-    #5bb5e2 100%
-  ) fixed;
+  background: #061828; /* SSR fallback — SkyBackground replaces this */
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -376,6 +367,11 @@ textarea::placeholder { color: #7facca; }
     rgba(140,195,230,0.55) 0px, rgba(140,195,230,0.55) 8px,
     transparent 8px, transparent 16px
   );
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.9; transform: scale(1);    }
+  50%       { opacity: 0.3; transform: scale(0.7); }
 }
 
 @keyframes fadeInUp {

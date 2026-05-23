@@ -37,11 +37,11 @@ export default function Home() {
     <main style={{ maxWidth: 480, margin: "0 auto", padding: "32px 16px 80px" }}>
 
       {/* 헤더 */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-            <span className="flight-tag">✈️ RESET PILOT</span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "rgba(255,255,255,0.85)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 28 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+            <span className="flight-tag" style={{ flexShrink: 0 }}>✈️ RESET PILOT</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "rgba(255,255,255,0.85)", whiteSpace: "nowrap", flexShrink: 0 }}>
               <span className="status-dot" style={{ background: "#6ee7e0" }} />
               운항 중
             </span>
@@ -51,7 +51,7 @@ export default function Home() {
             <span style={{ color: "#FFE066" }}>딱 하나만 다시 시작해봐요.</span>
           </h1>
         </div>
-        <button onClick={() => router.push("/history")} style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "8px 10px", fontSize: 18, cursor: "pointer" }}>
+        <button onClick={() => router.push("/history")} style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "8px 10px", fontSize: 18, cursor: "pointer", flexShrink: 0 }}>
           📋
         </button>
       </div>
