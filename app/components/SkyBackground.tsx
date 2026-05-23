@@ -136,12 +136,51 @@ export default function SkyBackground() {
         <div className="sky-patch" style={{ width:420, height:320, top:"40%", left:"-5%", background:"radial-gradient(ellipse, rgba(180,60,160,0.15)  0%, transparent 70%)", animationDuration:"26s", animationDelay:"-10s" }} />
       </>}
 
-      {/* 비행기 */}
+      {/* 비행기 — 낮/새벽 */}
       {(mode === "day" || mode === "dawn") && <>
         <div className="plane" style={{ top:"12%", animationName:"plane-lr", animationDuration:"90s",  animationDelay:"0s",   animationTimingFunction:"linear", animationIterationCount:"infinite" }}>✈️</div>
         <div className="plane" style={{ top:"48%", fontSize:14, animationName:"plane-lr", animationDuration:"110s", animationDelay:"-45s", animationTimingFunction:"linear", animationIterationCount:"infinite" }}>✈️</div>
         <div className="plane" style={{ top:"28%", animationName:"plane-rl", animationDuration:"100s", animationDelay:"-20s", animationTimingFunction:"linear", animationIterationCount:"infinite" }}>✈️</div>
       </>}
+
+      {/* 밤 비행기 — 빨간 점등 */}
+      {mode === "night" && <>
+        <NightPlane top="14%" duration="95s"  delay="0s"   direction="lr" />
+        <NightPlane top="38%" duration="120s" delay="-50s" direction="rl" small />
+        <NightPlane top="58%" duration="105s" delay="-28s" direction="lr" small />
+      </>}
     </>
+  );
+}
+
+function NightPlane({ top, duration, delay, direction, small }: {
+  top: string; duration: string; delay: string;
+  direction: "lr" | "rl"; small?: boolean;
+}) {
+  const size = small ? 10 : 14;
+  return (
+    <div style={{
+      position: "fixed", top, zIndex: 2, pointerEvents: "none", opacity: 0,
+      fontSize: size,
+      animationName: direction === "lr" ? "plane-lr" : "plane-rl",
+      animationDuration: duration,
+      animationDelay: delay,
+      animationTimingFunction: "linear",
+      animationIterationCount: "infinite",
+      filter: "grayscale(1) brightness(0.15)",  // 어두운 실루엣
+    }}>
+      ✈️
+      {/* 빨간 점멸등 */}
+      <span style={{
+        position: "absolute",
+        top: "20%", right: small ? "-2px" : "-3px",
+        width: small ? 3 : 4, height: small ? 3 : 4,
+        borderRadius: "50%",
+        background: "#ff2020",
+        boxShadow: "0 0 4px 2px rgba(255,30,30,0.8)",
+        animation: "blink 0.9s ease-in-out infinite",
+        display: "inline-block",
+      }} />
+    </div>
   );
 }

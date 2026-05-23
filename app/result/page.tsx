@@ -31,25 +31,40 @@ const MODE_CONFIG: Record<string, { color: string; bg: string; border: string; i
 };
 
 const SAMPLE: ResetResult = {
-  mode: "Drift Mode",
-  modeDesc: "완전히 망한 건 아닌데, 뭔가 손이 안 가고 하루가 흘러가는 상태예요.",
-  ruinScore: 52,
-  scoreBefore: 35,
-  scoreAfter: 68,
+  mode: "Crash Mode",
+  modeDesc: "에너지가 바닥이고 불안도 높아요. 오늘은 회복이 먼저예요.",
+  ruinScore: 74,
+  scoreBefore: 22,
+  scoreAfter: 58,
   emotionFact: {
-    emotion: "오늘 아무것도 못 했고 나는 의지력이 없는 사람이야.",
-    fact: "오전에 늦게 일어났고, 오후 내내 집중이 안 됐어요. 실제로 한 일이 없는 건 맞아요.",
-    interpret: "의지력 문제가 아니라 시작 트리거가 없었던 거예요. 첫 행동만 만들면 돼요.",
+    emotion: "나는 오늘 아무것도 못 한 쓸모없는 사람이야. 이러다 다 망하는 거 아닐까.",
+    fact: "오늘 오후 내내 시작을 못 했어요. 해야 할 일이 밀린 건 맞아요.",
+    interpret: "4시간 못 한 게 '인생 실패'로 확대된 거예요. 오늘 남은 시간이 아직 있어요.",
   },
-  recoveryGoal: "오늘 완벽하게 회복하기보다, 작은 행동 하나로 0점은 피하기.",
+  recoveryGoal: "전부 해결하려는 생각은 내려놓고, 딱 하나만 시작해보기.",
   actions: [
-    { name: "Body Reset",  title: "물 한 잔 마시고 스트레칭 5분", duration: "5분",  reason: "몸을 움직이면 뇌도 깨어나요. 가장 쉬운 시작점이에요." },
-    { name: "Space Reset", title: "책상 위 물건 3개만 정리하기",  duration: "10분", reason: "공간이 정리되면 머릿속도 조금 정리돼요." },
-    { name: "Life Reset",  title: "내일 할 일 딱 1개만 적어두기", duration: "5분",  reason: "내일을 준비하는 것만으로도 오늘을 의미 있게 닫을 수 있어요." },
+    {
+      name: "Body Reset",
+      title: "샤워하고 옷 갈아입기",
+      duration: "15분",
+      reason: "지금 상태를 물리적으로 리셋하는 가장 확실한 방법이에요. 진짜로 기분이 달라져요.",
+    },
+    {
+      name: "Space Reset",
+      title: "책상 위 컵이랑 쓰레기만 치우기",
+      duration: "5분",
+      reason: "방 전체 청소 말고, 딱 눈앞만 정리해요. 시야가 바뀌면 마음도 조금 달라요.",
+    },
+    {
+      name: "Life Reset",
+      title: "지금 제일 쉬운 일 하나, 타이머 25분만",
+      duration: "25분",
+      reason: "완벽하게 하려는 게 아니라 시작했다는 사실이 중요해요. 25분 후에 멈춰도 돼요.",
+    },
   ],
-  skip: ["밀린 업무 전부 해결하기", "방 전체 대청소", "완벽한 루틴 세우기"],
-  successCriteria: "위 3개 중 1개만 해도 오늘은 완전히 망한 날이 아니에요.",
-  message: "아직 끝나지 않았어. 지금 이 순간부터가 오늘의 후반전이야 ✈️",
+  skip: ["오늘 밀린 것 전부 처리하기", "완벽한 계획 먼저 세우기", "SNS 켜서 기분 전환하기"],
+  successCriteria: "샤워 하나만 해도 오늘은 0점이 아니에요. 나머지는 전부 보너스예요.",
+  message: "4시간 못 한 게 아니라, 지금 이걸 보고 있잖아. 그게 이미 시작이야 ✈️",
 };
 
 function ResultContent() {
@@ -185,10 +200,12 @@ function ResultContent() {
             </div>
           </div>
 
-          {/* 진행 바 */}
-          <div style={{ height: 3, background: "rgba(165,210,238,0.3)", borderRadius: 2, marginBottom: 12 }}>
-            <div style={{ height: "100%", width: `${progress}%`, background: "#1DB4A8", borderRadius: 2, transition: "width 0.3s" }} />
-          </div>
+          {/* 진행 바 — 첫 체크 후 등장 */}
+          {anyDone && (
+            <div style={{ height: 3, background: "rgba(165,210,238,0.3)", borderRadius: 2, marginBottom: 12 }}>
+              <div style={{ height: "100%", width: `${progress}%`, background: "#1DB4A8", borderRadius: 2, transition: "width 0.3s" }} />
+            </div>
+          )}
 
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {result.actions.map((action, i) => (
