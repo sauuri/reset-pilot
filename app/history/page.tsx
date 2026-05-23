@@ -35,7 +35,7 @@ export default function HistoryPage() {
           <div style={{ fontSize: 13, color: "#ff6b35", fontWeight: 700, letterSpacing: 2, marginBottom: 4 }}>
             RESET PILOT
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 900 }}>📅 복구 기록</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 900 }}>📦 블랙박스</h1>
         </div>
         <button
           onClick={() => router.push("/")}

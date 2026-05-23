@@ -39,11 +39,13 @@ export default function Home() {
         <div style={{ fontSize: 13, color: "#ff6b35", fontWeight: 700, marginBottom: 8, letterSpacing: 2 }}>
           RESET PILOT
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 900, lineHeight: 1.3, marginBottom: 8 }}>
-          오늘 망했어도<br />괜찮아 🔥
+        <h1 style={{ fontSize: 26, fontWeight: 900, lineHeight: 1.35, marginBottom: 10 }}>
+          오늘 망한 것 같아도,<br />아직 착륙은 가능해 🛬
         </h1>
-        <p style={{ color: "#888", fontSize: 14 }}>
-          지금 상태를 솔직하게 말해줘. AI가 복구 루트 찾아줄게.
+        <p style={{ color: "#888", fontSize: 14, lineHeight: 1.7 }}>
+          지금 상태를 솔직하게 입력해줘.<br />
+          AI가 감정과 사실을 분리하고,<br />
+          오늘 가능한 <strong style={{ color: "#f0f0f0" }}>3단계 복구 루트</strong>를 만들어줄게.
         </p>
       </div>
 
@@ -111,7 +113,7 @@ export default function Home() {
         </div>
 
         <button className="btn-primary" onClick={handleSubmit} disabled={loading || !text.trim()}>
-          {loading ? "AI가 루트 찾는 중... 🔍" : "오늘 복구 플랜 만들기 →"}
+          {loading ? "복구 루트 계산 중... 🛰️" : "비상 착륙 시작하기 🛬"}
         </button>
 
         <button
@@ -125,7 +127,7 @@ export default function Home() {
             textAlign: "center",
           }}
         >
-          📅 이전 복구 기록 보기
+          📦 블랙박스 (이전 기록)
         </button>
       </div>
     </main>
