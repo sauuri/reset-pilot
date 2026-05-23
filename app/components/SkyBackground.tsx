@@ -143,11 +143,14 @@ export default function SkyBackground() {
         <div className="plane" style={{ top:"28%", animationName:"plane-rl", animationDuration:"100s", animationDelay:"-20s", animationTimingFunction:"linear", animationIterationCount:"infinite" }}>✈️</div>
       </>}
 
-      {/* 밤 비행기 — 빨간 점등 */}
+      {/* 밤 비행기 + 인공위성 */}
       {mode === "night" && <>
         <NightPlane top="14%" duration="95s"  delay="0s"   direction="lr" />
         <NightPlane top="38%" duration="120s" delay="-50s" direction="rl" small />
         <NightPlane top="58%" duration="105s" delay="-28s" direction="lr" small />
+        {/* 인공위성 — 빛 없이 천천히 직선 이동 */}
+        <Satellite top="8%"  duration="220s" delay="0s"   />
+        <Satellite top="32%" duration="280s" delay="-110s" dim />
       </>}
     </>
   );
@@ -157,30 +160,62 @@ function NightPlane({ top, duration, delay, direction, small }: {
   top: string; duration: string; delay: string;
   direction: "lr" | "rl"; small?: boolean;
 }) {
-  const size = small ? 10 : 14;
   return (
     <div style={{
       position: "fixed", top, zIndex: 2, pointerEvents: "none", opacity: 0,
-      fontSize: size,
+      display: "flex", alignItems: "center", gap: 1,
       animationName: direction === "lr" ? "plane-lr" : "plane-rl",
       animationDuration: duration,
       animationDelay: delay,
       animationTimingFunction: "linear",
       animationIterationCount: "infinite",
-      filter: "grayscale(1) brightness(0.15)",  // 어두운 실루엣
     }}>
-      ✈️
-      {/* 빨간 점멸등 */}
+      {/* 어두운 실루엣 */}
+      <span style={{ fontSize: small ? 11 : 15, filter: "brightness(0.3) saturate(0)", opacity: 0.7 }}>✈️</span>
+      {/* 빨간 항법등 — 크고 밝게 */}
       <span style={{
         position: "absolute",
-        top: "20%", right: small ? "-2px" : "-3px",
+        top: "18%",
+        left: direction === "lr" ? "5%" : "auto",
+        right: direction === "rl" ? "5%" : "auto",
+        width: small ? 5 : 7,
+        height: small ? 5 : 7,
+        borderRadius: "50%",
+        background: "#ff1010",
+        boxShadow: "0 0 8px 4px rgba(255,10,10,0.95), 0 0 16px 8px rgba(255,10,10,0.5)",
+        animation: "blink 0.85s ease-in-out infinite",
+        display: "inline-block",
+      }} />
+      {/* 흰색 스트로브등 — 짧게 번쩍 */}
+      <span style={{
+        position: "absolute",
+        top: "-30%", left: "40%",
         width: small ? 3 : 4, height: small ? 3 : 4,
         borderRadius: "50%",
-        background: "#ff2020",
-        boxShadow: "0 0 4px 2px rgba(255,30,30,0.8)",
-        animation: "blink 0.9s ease-in-out infinite",
+        background: "white",
+        boxShadow: "0 0 6px 3px rgba(255,255,255,0.9)",
+        animation: "strobe 1.4s ease-in-out infinite",
         display: "inline-block",
       }} />
     </div>
+  );
+}
+
+function Satellite({ top, duration, delay, dim }: {
+  top: string; duration: string; delay: string; dim?: boolean;
+}) {
+  return (
+    <div style={{
+      position: "fixed", top, zIndex: 1, pointerEvents: "none", opacity: 0,
+      width: dim ? 2 : 3, height: dim ? 2 : 3,
+      borderRadius: "50%",
+      background: dim ? "rgba(200,220,255,0.7)" : "rgba(220,235,255,0.9)",
+      boxShadow: dim
+        ? "0 0 3px 1px rgba(200,220,255,0.4)"
+        : "0 0 5px 2px rgba(210,230,255,0.7)",
+      animation: "satellite linear infinite",
+      animationDuration: duration,
+      animationDelay: delay,
+    }} />
   );
 }
