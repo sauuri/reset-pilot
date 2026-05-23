@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #c8e8f7;
-  --surface: rgba(255,255,255,0.88);
-  --surface2: rgba(232,245,253,0.9);
-  --border: rgba(180,215,240,0.6);
-  --border2: #A8CCDF;
+  --bg: #b8e0f5;
+  --surface: rgba(255,255,255,0.9);
+  --surface2: rgba(232,245,253,0.85);
+  --border: rgba(165,210,238,0.55);
   --text: #1A1F36;
-  --muted: #5a7080;
+  --muted: #4e6e82;
   --accent: #FF6B35;
   --navy: #0A2463;
   --teal: #1DB4A8;
   --red: #E53935;
   --yellow: #F59E0B;
+  --sky-notch: #a8d8f0;
 }
 
 @theme inline {
@@ -25,17 +25,16 @@
 * { box-sizing: border-box; }
 
 body {
-  background:
-    linear-gradient(160deg,
-      #5ab4e0 0%,
-      #7ec8ec 12%,
-      #a8daf4 28%,
-      #c2e9f8 45%,
-      #d8f0fb 62%,
-      #b8e0f5 78%,
-      #8ecce8 90%,
-      #6ab8de 100%
-    ) fixed;
+  background: linear-gradient(160deg,
+    #4faed8 0%,
+    #72c6eb 10%,
+    #9dd8f3 25%,
+    #bce8fa 42%,
+    #d5f0fc 58%,
+    #b2e0f5 72%,
+    #84cceb 86%,
+    #5bb5e2 100%
+  ) fixed;
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -46,14 +45,14 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(10,36,99,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(10,36,99,0.03) 1px, transparent 1px);
+    linear-gradient(rgba(10,36,99,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10,36,99,0.025) 1px, transparent 1px);
   background-size: 32px 32px;
   pointer-events: none;
   z-index: 0;
 }
 
-/* 하늘색 패치 */
+/* 하늘 패치 */
 .sky-patch {
   position: fixed;
   pointer-events: none;
@@ -61,10 +60,9 @@ body::before {
   border-radius: 50%;
   animation: sky-breathe ease-in-out infinite;
 }
-
 @keyframes sky-breathe {
-  0%, 100% { opacity: 0.55; transform: scale(1); }
-  50%       { opacity: 0.85; transform: scale(1.08); }
+  0%, 100% { opacity: 0.5;  transform: scale(1);    }
+  50%       { opacity: 0.85; transform: scale(1.07); }
 }
 
 /* 구름 */
@@ -73,36 +71,21 @@ body::before {
   pointer-events: none;
   z-index: 1;
   border-radius: 60px;
-  background: rgba(255,255,255,0.78);
-  box-shadow: 0 6px 20px rgba(80,150,200,0.12), inset 0 -4px 10px rgba(180,220,245,0.3);
+  background: rgba(255,255,255,0.75);
+  box-shadow: 0 6px 24px rgba(80,155,210,0.1), inset 0 -4px 10px rgba(190,225,248,0.25);
   animation: cloud-float linear infinite;
 }
-
-.cloud::before,
-.cloud::after {
+.cloud::before, .cloud::after {
   content: '';
   position: absolute;
   border-radius: 50%;
-  background: rgba(255,255,255,0.78);
+  background: rgba(255,255,255,0.75);
 }
-
-.cloud::before {
-  width: 55%;
-  height: 170%;
-  top: -55%;
-  left: 14%;
-}
-
-.cloud::after {
-  width: 40%;
-  height: 140%;
-  top: -40%;
-  right: 14%;
-}
-
+.cloud::before { width: 55%; height: 170%; top: -55%; left: 14%; }
+.cloud::after  { width: 40%; height: 140%; top: -40%; right: 14%; }
 @keyframes cloud-float {
   from { transform: translateX(-260px); }
-  to   { transform: translateX(110vw); }
+  to   { transform: translateX(110vw);  }
 }
 
 /* 비행기 */
@@ -114,29 +97,141 @@ body::before {
   filter: drop-shadow(0 3px 6px rgba(10,36,99,0.25));
   opacity: 0;
 }
-
-/* 왼쪽 → 오른쪽, 살짝 상승하며 */
 @keyframes plane-lr {
-  0%    { transform: translateX(-80px)  translateY(0px)  rotate(-4deg); opacity: 0; }
-  3%    { opacity: 0.85; }
-  97%   { opacity: 0.85; }
-  100%  { transform: translateX(110vw)  translateY(-60px) rotate(-4deg); opacity: 0; }
+  0%   { transform: translateX(-80px)  translateY(0px)  rotate(-4deg); opacity: 0;    }
+  3%   { opacity: 0.85; }
+  97%  { opacity: 0.85; }
+  100% { transform: translateX(110vw)  translateY(-60px) rotate(-4deg); opacity: 0;  }
 }
-
-/* 오른쪽 → 왼쪽, 살짝 하강하며 (반전) */
 @keyframes plane-rl {
-  0%    { transform: translateX(110vw)  translateY(0px)  rotate(4deg) scaleX(-1); opacity: 0; }
-  3%    { opacity: 0.7; }
-  97%   { opacity: 0.7; }
-  100%  { transform: translateX(-80px)  translateY(40px) rotate(4deg) scaleX(-1); opacity: 0; }
+  0%   { transform: translateX(110vw)  translateY(0px)  rotate(4deg) scaleX(-1); opacity: 0;  }
+  3%   { opacity: 0.7; }
+  97%  { opacity: 0.7; }
+  100% { transform: translateX(-80px)  translateY(40px) rotate(4deg) scaleX(-1); opacity: 0; }
 }
 
 main { position: relative; z-index: 3; }
 
+/* ── 탑승권 (Boarding Pass) ─────────────────── */
+
+.ticket {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    0 10px 48px rgba(10,36,99,0.22),
+    0 2px 8px  rgba(10,36,99,0.1);
+  position: relative;
+}
+
+.ticket-header {
+  background: linear-gradient(135deg, #0A2463 0%, #163678 100%);
+  padding: 16px 20px;
+}
+
+.ticket-body {
+  background: #ffffff;
+  padding: 18px 20px;
+}
+
+.ticket-stub {
+  background: #f0f7fd;
+  padding: 14px 20px;
+}
+
+/* 점선 + 반원 구멍 분리선 */
+.ticket-tear {
+  position: relative;
+  height: 24px;
+  background-color: #ffffff;
+  /* 점선: 원 영역 피해서만 그림 */
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(10,36,99,0.14) 0px, rgba(10,36,99,0.14) 7px,
+    transparent 7px, transparent 14px
+  );
+  background-size: calc(100% - 30px) 2px;
+  background-position: 15px center;
+  background-repeat: no-repeat;
+  overflow: visible;
+}
+/* stub 위에 오는 tear는 stub 색 배경 */
+.ticket-tear.tear-stub {
+  background-color: #f0f7fd;
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(10,36,99,0.1) 0px, rgba(10,36,99,0.1) 7px,
+    transparent 7px, transparent 14px
+  );
+  background-size: calc(100% - 30px) 2px;
+  background-position: 15px center;
+  background-repeat: no-repeat;
+}
+.ticket-tear::before,
+.ticket-tear::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--sky-notch);
+  z-index: 2;
+}
+.ticket-tear::before { left:  -10px; }
+.ticket-tear::after  { right: -10px; }
+
+/* 티켓 텍스트 */
+.ticket-label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  color: #9ab8cc;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.ticket-value {
+  font-size: 15px;
+  font-weight: 900;
+  color: #1A1F36;
+  line-height: 1.2;
+}
+
+/* 바코드 */
+.barcode {
+  height: 44px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    #1A1F36 0px,  #1A1F36 2px,
+    transparent   2px,  transparent   5px,
+    #1A1F36 5px,  #1A1F36 8px,
+    transparent   8px,  transparent  10px,
+    #1A1F36 10px, #1A1F36 11px,
+    transparent  11px, transparent  14px,
+    #1A1F36 14px, #1A1F36 18px,
+    transparent  18px, transparent  20px,
+    #1A1F36 20px, #1A1F36 21px,
+    transparent  21px, transparent  25px,
+    #1A1F36 25px, #1A1F36 28px,
+    transparent  28px, transparent  30px,
+    #1A1F36 30px, #1A1F36 31px,
+    transparent  31px, transparent  35px,
+    #1A1F36 35px, #1A1F36 38px,
+    transparent  38px, transparent  40px,
+    #1A1F36 40px, #1A1F36 42px,
+    transparent  42px, transparent  45px,
+    #1A1F36 45px, #1A1F36 46px,
+    transparent  46px, transparent  50px
+  );
+  opacity: 0.65;
+}
+
+/* ─── 기존 UI ─────────────────────────────── */
+
 .card {
   background: rgba(255,255,255,0.82);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(200,230,248,0.7);
+  border: 1px solid rgba(190,225,248,0.6);
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 2px 16px rgba(10,36,99,0.08);
@@ -162,10 +257,9 @@ main { position: relative; z-index: 3; }
   width: 100%;
   height: 6px;
   border-radius: 3px;
-  background: rgba(180,215,240,0.5);
+  background: rgba(170,210,238,0.45);
   outline: none;
 }
-
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -191,13 +285,11 @@ main { position: relative; z-index: 3; }
   letter-spacing: 0.3px;
   box-shadow: 0 4px 16px rgba(10,36,99,0.3);
 }
-
 .btn-primary:hover {
   background: #0d2d7a;
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(10,36,99,0.35);
 }
-
 .btn-primary:disabled {
   opacity: 0.4;
   cursor: not-allowed;
@@ -205,9 +297,9 @@ main { position: relative; z-index: 3; }
 }
 
 .btn-ghost {
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.45);
   backdrop-filter: blur(6px);
-  border: 1px solid rgba(180,215,240,0.7);
+  border: 1px solid rgba(180,215,240,0.65);
   color: var(--muted);
   border-radius: 10px;
   padding: 10px 20px;
@@ -216,17 +308,16 @@ main { position: relative; z-index: 3; }
   width: 100%;
   transition: all 0.2s;
 }
-
 .btn-ghost:hover {
   border-color: var(--navy);
   color: var(--navy);
-  background: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.65);
 }
 
 textarea {
-  background: rgba(232,245,253,0.7);
+  background: rgba(225,242,252,0.65);
   backdrop-filter: blur(4px);
-  border: 1.5px solid rgba(180,215,240,0.7);
+  border: 1.5px solid rgba(170,210,238,0.65);
   color: var(--text);
   border-radius: 12px;
   padding: 14px;
@@ -237,15 +328,11 @@ textarea {
   transition: border-color 0.2s;
   line-height: 1.6;
 }
-
 textarea:focus {
   border-color: var(--navy);
   background: rgba(255,255,255,0.85);
 }
-
-textarea::placeholder {
-  color: #7fa8c0;
-}
+textarea::placeholder { color: #7facca; }
 
 .flight-tag {
   display: inline-flex;
@@ -267,10 +354,9 @@ textarea::placeholder {
   display: inline-block;
   animation: blink 1.5s infinite;
 }
-
 @keyframes blink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  50%       { opacity: 0.3; }
 }
 
 .runway-divider {
@@ -281,29 +367,24 @@ textarea::placeholder {
   color: var(--muted);
   font-size: 12px;
 }
-
-.runway-divider::before,
-.runway-divider::after {
+.runway-divider::before, .runway-divider::after {
   content: '';
   flex: 1;
   height: 1px;
   background: repeating-linear-gradient(
     90deg,
-    rgba(150,200,230,0.6) 0px,
-    rgba(150,200,230,0.6) 8px,
-    transparent 8px,
-    transparent 16px
+    rgba(140,195,230,0.55) 0px, rgba(140,195,230,0.55) 8px,
+    transparent 8px, transparent 16px
   );
 }
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0);    }
 }
-
-.animate-fadeInUp { animation: fadeInUp 0.4s ease forwards; }
-.animate-delay-1 { animation-delay: 0.1s; opacity: 0; }
-.animate-delay-2 { animation-delay: 0.2s; opacity: 0; }
-.animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
-.animate-delay-4 { animation-delay: 0.4s; opacity: 0; }
-.animate-delay-5 { animation-delay: 0.5s; opacity: 0; }
+.animate-fadeInUp  { animation: fadeInUp 0.4s ease forwards; }
+.animate-delay-1   { animation-delay: 0.1s; opacity: 0; }
+.animate-delay-2   { animation-delay: 0.2s; opacity: 0; }
+.animate-delay-3   { animation-delay: 0.3s; opacity: 0; }
+.animate-delay-4   { animation-delay: 0.4s; opacity: 0; }
+.animate-delay-5   { animation-delay: 0.5s; opacity: 0; }
