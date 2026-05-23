@@ -43,6 +43,44 @@ body::before {
   z-index: 0;
 }
 
+/* 구름 */
+.cloud {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.82);
+  box-shadow: 0 4px 16px rgba(10,36,99,0.06);
+  animation: cloud-float linear infinite;
+}
+
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  background: rgba(255,255,255,0.82);
+  border-radius: 50%;
+}
+
+.cloud::before {
+  width: 55%;
+  height: 160%;
+  top: -50%;
+  left: 15%;
+}
+
+.cloud::after {
+  width: 38%;
+  height: 130%;
+  top: -35%;
+  right: 15%;
+}
+
+@keyframes cloud-float {
+  from { transform: translateX(-200px); }
+  to   { transform: translateX(110vw); }
+}
+
 main { position: relative; z-index: 1; }
 
 .card {
