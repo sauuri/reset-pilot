@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #F4F6FA;
-  --surface: #FFFFFF;
-  --surface2: #F0F2F7;
-  --border: #E2E6F0;
-  --border2: #C8CFDE;
+  --bg: #c8e8f7;
+  --surface: rgba(255,255,255,0.88);
+  --surface2: rgba(232,245,253,0.9);
+  --border: rgba(180,215,240,0.6);
+  --border2: #A8CCDF;
   --text: #1A1F36;
-  --muted: #6B7494;
+  --muted: #5a7080;
   --accent: #FF6B35;
   --navy: #0A2463;
   --teal: #1DB4A8;
@@ -25,32 +25,56 @@
 * { box-sizing: border-box; }
 
 body {
-  background: var(--bg);
+  background:
+    linear-gradient(160deg,
+      #5ab4e0 0%,
+      #7ec8ec 12%,
+      #a8daf4 28%,
+      #c2e9f8 45%,
+      #d8f0fb 62%,
+      #b8e0f5 78%,
+      #8ecce8 90%,
+      #6ab8de 100%
+    ) fixed;
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* 항공 계기판 격자 배경 */
+/* 격자 */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(10,36,99,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(10,36,99,0.04) 1px, transparent 1px);
+    linear-gradient(rgba(10,36,99,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10,36,99,0.03) 1px, transparent 1px);
   background-size: 32px 32px;
   pointer-events: none;
   z-index: 0;
+}
+
+/* 하늘색 패치 */
+.sky-patch {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50%;
+  animation: sky-breathe ease-in-out infinite;
+}
+
+@keyframes sky-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%       { opacity: 0.85; transform: scale(1.08); }
 }
 
 /* 구름 */
 .cloud {
   position: fixed;
   pointer-events: none;
-  z-index: 0;
-  border-radius: 50px;
-  background: rgba(255,255,255,0.82);
-  box-shadow: 0 4px 16px rgba(10,36,99,0.06);
+  z-index: 1;
+  border-radius: 60px;
+  background: rgba(255,255,255,0.78);
+  box-shadow: 0 6px 20px rgba(80,150,200,0.12), inset 0 -4px 10px rgba(180,220,245,0.3);
   animation: cloud-float linear infinite;
 }
 
@@ -58,48 +82,74 @@ body::before {
 .cloud::after {
   content: '';
   position: absolute;
-  background: rgba(255,255,255,0.82);
   border-radius: 50%;
+  background: rgba(255,255,255,0.78);
 }
 
 .cloud::before {
   width: 55%;
-  height: 160%;
-  top: -50%;
-  left: 15%;
+  height: 170%;
+  top: -55%;
+  left: 14%;
 }
 
 .cloud::after {
-  width: 38%;
-  height: 130%;
-  top: -35%;
-  right: 15%;
+  width: 40%;
+  height: 140%;
+  top: -40%;
+  right: 14%;
 }
 
 @keyframes cloud-float {
-  from { transform: translateX(-200px); }
+  from { transform: translateX(-260px); }
   to   { transform: translateX(110vw); }
 }
 
-main { position: relative; z-index: 1; }
+/* 비행기 */
+.plane {
+  position: fixed;
+  pointer-events: none;
+  z-index: 2;
+  font-size: 22px;
+  filter: drop-shadow(0 3px 6px rgba(10,36,99,0.25));
+  opacity: 0;
+}
+
+/* 왼쪽 → 오른쪽, 살짝 상승하며 */
+@keyframes plane-lr {
+  0%    { transform: translateX(-80px)  translateY(0px)  rotate(-4deg); opacity: 0; }
+  3%    { opacity: 0.85; }
+  97%   { opacity: 0.85; }
+  100%  { transform: translateX(110vw)  translateY(-60px) rotate(-4deg); opacity: 0; }
+}
+
+/* 오른쪽 → 왼쪽, 살짝 하강하며 (반전) */
+@keyframes plane-rl {
+  0%    { transform: translateX(110vw)  translateY(0px)  rotate(4deg) scaleX(-1); opacity: 0; }
+  3%    { opacity: 0.7; }
+  97%   { opacity: 0.7; }
+  100%  { transform: translateX(-80px)  translateY(40px) rotate(4deg) scaleX(-1); opacity: 0; }
+}
+
+main { position: relative; z-index: 3; }
 
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(200,230,248,0.7);
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 2px 12px rgba(10,36,99,0.06);
+  box-shadow: 0 2px 16px rgba(10,36,99,0.08);
 }
 
 .card-navy {
   background: var(--navy);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 16px;
   padding: 20px;
   color: white;
 }
 
-/* 계기판 스타일 숫자 */
 .gauge {
   font-family: 'Courier New', monospace;
   font-weight: 900;
@@ -112,7 +162,7 @@ main { position: relative; z-index: 1; }
   width: 100%;
   height: 6px;
   border-radius: 3px;
-  background: var(--border);
+  background: rgba(180,215,240,0.5);
   outline: none;
 }
 
@@ -139,13 +189,13 @@ main { position: relative; z-index: 1; }
   width: 100%;
   transition: all 0.2s;
   letter-spacing: 0.3px;
-  box-shadow: 0 4px 16px rgba(10,36,99,0.25);
+  box-shadow: 0 4px 16px rgba(10,36,99,0.3);
 }
 
 .btn-primary:hover {
   background: #0d2d7a;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(10,36,99,0.3);
+  box-shadow: 0 6px 20px rgba(10,36,99,0.35);
 }
 
 .btn-primary:disabled {
@@ -155,8 +205,9 @@ main { position: relative; z-index: 1; }
 }
 
 .btn-ghost {
-  background: transparent;
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(180,215,240,0.7);
   color: var(--muted);
   border-radius: 10px;
   padding: 10px 20px;
@@ -169,11 +220,13 @@ main { position: relative; z-index: 1; }
 .btn-ghost:hover {
   border-color: var(--navy);
   color: var(--navy);
+  background: rgba(255,255,255,0.7);
 }
 
 textarea {
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
+  background: rgba(232,245,253,0.7);
+  backdrop-filter: blur(4px);
+  border: 1.5px solid rgba(180,215,240,0.7);
   color: var(--text);
   border-radius: 12px;
   padding: 14px;
@@ -187,14 +240,13 @@ textarea {
 
 textarea:focus {
   border-color: var(--navy);
-  background: var(--surface);
+  background: rgba(255,255,255,0.85);
 }
 
 textarea::placeholder {
-  color: #A0A8C0;
+  color: #7fa8c0;
 }
 
-/* 항공 태그 */
 .flight-tag {
   display: inline-flex;
   align-items: center;
@@ -208,7 +260,6 @@ textarea::placeholder {
   border-radius: 20px;
 }
 
-/* 상태 표시등 */
 .status-dot {
   width: 8px;
   height: 8px;
@@ -222,7 +273,6 @@ textarea::placeholder {
   50% { opacity: 0.3; }
 }
 
-/* 활주로 구분선 */
 .runway-divider {
   display: flex;
   align-items: center;
@@ -239,8 +289,8 @@ textarea::placeholder {
   height: 1px;
   background: repeating-linear-gradient(
     90deg,
-    var(--border) 0px,
-    var(--border) 8px,
+    rgba(150,200,230,0.6) 0px,
+    rgba(150,200,230,0.6) 8px,
     transparent 8px,
     transparent 16px
   );
