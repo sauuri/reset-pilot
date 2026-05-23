@@ -150,6 +150,11 @@ export default function InsightsPage() {
   const summary = buildSummary(topPatterns, topActions, total, avgCompleted);
   const stageMsg = total >= 10 ? "당신만의 복구 공식이 꽤 선명해졌어요." : "이제 조금씩 패턴이 보이기 시작했어요.";
 
+  const crashCount = modeCount["Crash Mode"] ?? 0;
+  const needsSupport =
+    (total >= 5 && crashCount / total >= 0.6) ||
+    (moodRecords.length >= 3 && moodWorse / moodRecords.length >= 0.5);
+
   return (
     <main style={{ maxWidth: 480, margin: "0 auto", padding: "32px 16px 80px" }}>
 
@@ -352,6 +357,32 @@ export default function InsightsPage() {
                 {Math.round((moodBetter / moodRecords.length) * 100)}%의 경우 복구 후 기분이 나아졌어요 🛬
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 💙 전문가 권유 — 지속적 위기 패턴 */}
+      {needsSupport && (
+        <div className="ticket animate-fadeInUp" style={{ marginBottom: 14 }}>
+          <div className="ticket-header" style={{ padding: "12px 20px", background: "linear-gradient(135deg, #0d1b3e 0%, #1a1a4e 100%)" }}>
+            <div className="ticket-label" style={{ color: "rgba(255,255,255,0.5)" }}>💙 혼자 감당하기 어려울 때</div>
+          </div>
+          <div className="ticket-body">
+            <div style={{ fontSize: 13, color: "#4e6e82", lineHeight: 1.75, marginBottom: 14 }}>
+              최근 기록을 보면 많이 힘든 날이 반복되고 있어요.<br />
+              ResetPilot이 작은 도움은 드릴 수 있지만,{" "}
+              <strong style={{ color: "#1A1F36" }}>전문가와 함께하면 더 많이 달라질 수 있어요.</strong>{" "}
+              도움을 요청하는 건 약한 게 아니에요.
+            </div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              <a href="tel:1393" style={{ flex: 1, padding: "10px 6px", background: "#0A2463", borderRadius: 9, textAlign: "center", fontSize: 12, fontWeight: 700, color: "white", textDecoration: "none", display: "block" }}>
+                📞 자살예방상담 1393
+              </a>
+              <a href="tel:15770199" style={{ flex: 1, padding: "10px 6px", background: "#0A2463", borderRadius: 9, textAlign: "center", fontSize: 12, fontWeight: 700, color: "white", textDecoration: "none", display: "block" }}>
+                📞 정신건강 1577-0199
+              </a>
+            </div>
+            <div style={{ fontSize: 11, color: "#9ab8cc", textAlign: "center" }}>24시간 · 무료 · 익명 · 문자 가능</div>
           </div>
         </div>
       )}

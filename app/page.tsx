@@ -208,6 +208,16 @@ export default function Home() {
         {loading ? "🛰️ 플랜 생성 중..." : "✈️ 지금 할 일 3개 받기"}
       </button>
 
+      {/* 위기 상담 */}
+      <div style={{ marginTop: 28, textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.38)", lineHeight: 1.9 }}>
+        혼자 감당하기 너무 힘들다면
+        <div style={{ marginTop: 4, display: "flex", justifyContent: "center", gap: 16 }}>
+          <a href="tel:1393" style={{ color: "rgba(255,255,255,0.6)", fontWeight: 700, textDecoration: "none" }}>자살예방상담전화 1393</a>
+          <a href="tel:15770199" style={{ color: "rgba(255,255,255,0.6)", fontWeight: 700, textDecoration: "none" }}>정신건강위기 1577-0199</a>
+        </div>
+        <div style={{ fontSize: 11, marginTop: 3, color: "rgba(255,255,255,0.25)" }}>24시간 · 무료 · 익명</div>
+      </div>
+
     </main>
   );
 }

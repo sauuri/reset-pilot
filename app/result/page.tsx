@@ -399,6 +399,25 @@ function ResultContent() {
         </div>
       </div>
 
+      {/* 전문가 연결 — Crash Mode + 실사용 */}
+      {mode === "Crash Mode" && !isDemo && (
+        <div style={{ marginBottom: 14, padding: "16px 18px", background: "rgba(10,20,50,0.55)", backdropFilter: "blur(10px)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.12)" }}>
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, marginBottom: 12 }}>
+            <strong style={{ color: "white" }}>오늘 많이 힘드셨군요.</strong><br />
+            앱만으로 감당이 안 될 때는 전문가와 이야기하는 것도 방법이에요. 약해서가 아니에요.
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <a href="tel:1393" style={{ flex: 1, padding: "9px 6px", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 9, textAlign: "center", fontSize: 12, fontWeight: 700, color: "white", textDecoration: "none", display: "block" }}>
+              📞 자살예방 1393
+            </a>
+            <a href="tel:15770199" style={{ flex: 1, padding: "9px 6px", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 9, textAlign: "center", fontSize: 12, fontWeight: 700, color: "white", textDecoration: "none", display: "block" }}>
+              📞 정신건강 1577-0199
+            </a>
+          </div>
+          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 7, textAlign: "center" }}>24시간 · 무료 · 익명</div>
+        </div>
+      )}
+
       {isDemo && (
         <div style={{ marginBottom: 14, padding: "12px 16px", background: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.35)", textAlign: "center" }}>
           <div style={{ fontSize: 12, color: "white", fontWeight: 700, marginBottom: 6 }}>👀 샘플 리포트입니다</div>
