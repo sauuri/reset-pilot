@@ -10,10 +10,12 @@ export default function Home() {
   const [anxiety, setAnxiety] = useState(5);
   const [timeLeft, setTimeLeft] = useState("2시간");
   const [loading, setLoading] = useState(false);
+  const [flightStatus, setFlightStatus] = useState<"ready" | "flying" | "arrived">("ready");
 
   async function handleSubmit() {
     if (!text.trim()) return;
     setLoading(true);
+    setFlightStatus("flying");
     try {
       const res = await fetch("/api/reset", {
         method: "POST",
@@ -25,9 +27,11 @@ export default function Home() {
       const log = JSON.parse(localStorage.getItem("resetLog") || "[]");
       log.unshift({ ...data, date: new Date().toLocaleDateString("ko-KR"), input: text });
       localStorage.setItem("resetLog", JSON.stringify(log.slice(0, 30)));
-      router.push("/result");
+      setFlightStatus("arrived");
+      setTimeout(() => router.push("/result"), 900);
     } catch {
       alert("오류가 발생했어요. 다시 시도해주세요.");
+      setFlightStatus("ready");
     } finally {
       setLoading(false);
     }
@@ -41,9 +45,20 @@ export default function Home() {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
             <span className="flight-tag" style={{ flexShrink: 0 }}>✈️ RESET PILOT</span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "rgba(255,255,255,0.85)", whiteSpace: "nowrap", flexShrink: 0 }}>
-              <span className="status-dot" style={{ background: "#6ee7e0" }} />
-              운항 중
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11,
+              whiteSpace: "nowrap", flexShrink: 0,
+              color: flightStatus === "arrived" ? "#4ade80" : "rgba(255,255,255,0.85)",
+              transition: "color 0.3s",
+            }}>
+              <span className="status-dot" style={{
+                background: flightStatus === "ready" ? "#f59e0b" : flightStatus === "flying" ? "#6ee7e0" : "#4ade80",
+                animation: flightStatus === "flying" ? "blink 1.5s infinite" : "none",
+                transition: "background 0.3s",
+              }} />
+              {flightStatus === "ready" && "준비 중"}
+              {flightStatus === "flying" && "운항 중"}
+              {flightStatus === "arrived" && "도착 ✓"}
             </span>
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 900, lineHeight: 1.4, color: "white", margin: 0, textShadow: "0 2px 10px rgba(10,36,99,0.25)" }}>

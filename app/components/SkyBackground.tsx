@@ -36,14 +36,14 @@ function getMoonPos(h: number) {
   return { x: t * 78 + 11, y: 80 - Math.sin(t * Math.PI) * 60 };
 }
 
-// sin 기반 시드 난수 — 규칙적인 대각선 패턴 방지
 const sr = (s: number) => { const x = Math.sin(s) * 43758.5453; return x - Math.floor(x); };
-const STARS = Array.from({ length: 80 }, (_, i) => ({
+const STARS = Array.from({ length: 90 }, (_, i) => ({
   x:       sr(i * 7.3891 + 1.1) * 100,
-  y:       sr(i * 3.1415 + 2.7) * 65,
-  size:    sr(i * 1.618) > 0.85 ? 3 : sr(i * 1.618) > 0.6 ? 2 : 1,
-  opacity: 0.4 + sr(i * 5.2) * 0.55,
-  twinkle: sr(i * 9.1) > 0.65,
+  y:       sr(i * 3.1415 + 2.7) * 68,
+  size:    sr(i * 1.618) > 0.88 ? 5 : sr(i * 1.618) > 0.65 ? 3 : 2,
+  opacity: 0.7 + sr(i * 5.2) * 0.28,
+  warm:    sr(i * 4.2) > 0.88,  // 가끔 노란빛 별
+  twinkle: sr(i * 9.1) > 0.55,
   delay:   (sr(i * 2.718) * 4).toFixed(1),
   dur:     (1.4 + sr(i * 0.577) * 2.2).toFixed(1),
 }));
@@ -80,7 +80,11 @@ export default function SkyBackground() {
         <div key={i} style={{
           position:"fixed", left:`${s.x}%`, top:`${s.y}%`,
           width:s.size, height:s.size, borderRadius:"50%",
-          background:"white", opacity:s.opacity,
+          background: s.warm ? "#fff8cc" : "white",
+          opacity: s.opacity,
+          boxShadow: s.size >= 4
+            ? `0 0 ${s.size * 2}px ${s.size}px rgba(255,255,255,0.55)`
+            : `0 0 ${s.size + 1}px rgba(255,255,255,0.4)`,
           animation: s.twinkle ? `twinkle ${s.dur}s ease-in-out ${s.delay}s infinite` : "none",
           zIndex:0, pointerEvents:"none",
         }} />
