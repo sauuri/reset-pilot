@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface Action {
   name: string;
@@ -30,17 +30,67 @@ const MODE_CONFIG: Record<string, { color: string; bg: string; border: string; i
   "Launch Mode": { color: "#1DB4A8", bg: "#F0FDFC", border: "#99F6E4", icon: "🟢", label: "실행 모드" },
 };
 
-export default function ResultPage() {
+const SAMPLE: ResetResult = {
+  mode: "Drift Mode",
+  modeDesc: "완전히 망한 건 아닌데, 뭔가 손이 안 가고 하루가 흘러가는 상태예요.",
+  ruinScore: 52,
+  scoreBefore: 35,
+  scoreAfter: 68,
+  emotionFact: {
+    emotion: "오늘 아무것도 못 했고 나는 의지력이 없는 사람이야.",
+    fact: "오전에 늦게 일어났고, 오후 내내 집중이 안 됐어요. 실제로 한 일이 없는 건 맞아요.",
+    interpret: "의지력 문제가 아니라 시작 트리거가 없었던 거예요. 첫 행동만 만들면 돼요.",
+  },
+  recoveryGoal: "오늘 완벽하게 회복하기보다, 작은 행동 하나로 0점은 피하기.",
+  actions: [
+    { name: "Body Reset",  title: "물 한 잔 마시고 스트레칭 5분", duration: "5분",  reason: "몸을 움직이면 뇌도 깨어나요. 가장 쉬운 시작점이에요." },
+    { name: "Space Reset", title: "책상 위 물건 3개만 정리하기",  duration: "10분", reason: "공간이 정리되면 머릿속도 조금 정리돼요." },
+    { name: "Life Reset",  title: "내일 할 일 딱 1개만 적어두기", duration: "5분",  reason: "내일을 준비하는 것만으로도 오늘을 의미 있게 닫을 수 있어요." },
+  ],
+  skip: ["밀린 업무 전부 해결하기", "방 전체 대청소", "완벽한 루틴 세우기"],
+  successCriteria: "위 3개 중 1개만 해도 오늘은 완전히 망한 날이 아니에요.",
+  message: "아직 끝나지 않았어. 지금 이 순간부터가 오늘의 후반전이야 ✈️",
+};
+
+function ResultContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isDemo = searchParams.get("demo") === "true";
+
   const [result, setResult] = useState<ResetResult | null>(null);
+  const [noData, setNoData] = useState(false);
   const [checked, setChecked] = useState<boolean[]>([false, false, false]);
-  const [justChecked, setJustChecked] = useState(false);
 
   useEffect(() => {
+    if (isDemo) { setResult(SAMPLE); return; }
     const raw = localStorage.getItem("resetResult");
-    if (!raw) { router.push("/"); return; }
+    if (!raw) { setNoData(true); return; }
     setResult(JSON.parse(raw));
-  }, [router]);
+  }, [isDemo]);
+
+  /* 데이터 없음 — 빈 상태 */
+  if (noData) {
+    return (
+      <main style={{ maxWidth: 480, margin: "0 auto", padding: "80px 16px", textAlign: "center" }}>
+        <div style={{ fontSize: 48, marginBottom: 20 }}>🛫</div>
+        <div style={{ fontSize: 18, fontWeight: 900, color: "white", marginBottom: 10, textShadow: "0 2px 8px rgba(10,36,99,0.3)" }}>
+          아직 생성된 복구 리포트가 없어요.
+        </div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.7, marginBottom: 32 }}>
+          먼저 현재 상태를 입력하면<br />
+          AI가 오늘 가능한 복구 플랜을 만들어드릴게요.
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 300, margin: "0 auto" }}>
+          <button className="btn-primary" onClick={() => router.push("/")}>
+            ✈️ 복구 플랜 만들러 가기
+          </button>
+          <button className="btn-ghost" onClick={() => router.push("/result?demo=true")}>
+            👀 샘플 리포트 보기
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   if (!result) return null;
 
@@ -55,7 +105,6 @@ export default function ResultPage() {
     const next = [...checked];
     next[i] = !next[i];
     setChecked(next);
-    if (!checked[i]) setJustChecked(true); // 처음 체크 시 피드백
   }
 
   return (
@@ -269,6 +318,15 @@ export default function ResultPage() {
         </div>
       </div>
 
+      {isDemo && (
+        <div style={{ marginBottom: 14, padding: "12px 16px", background: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.35)", textAlign: "center" }}>
+          <div style={{ fontSize: 12, color: "white", fontWeight: 700, marginBottom: 6 }}>👀 샘플 리포트입니다</div>
+          <button className="btn-primary" style={{ fontSize: 13, padding: "10px 20px" }} onClick={() => router.push("/")}>
+            ✈️ 내 복구 플랜 만들기
+          </button>
+        </div>
+      )}
+
       <button className="btn-primary animate-fadeInUp animate-delay-3" onClick={() => router.push("/")}>
         {allDone ? "🛬 오늘 착륙 완료! 내일도 ㄱ" : "✈️ 다시 입력하기"}
       </button>
@@ -276,6 +334,14 @@ export default function ResultPage() {
         📋 기록 보기
       </button>
     </main>
+  );
+}
+
+export default function ResultPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResultContent />
+    </Suspense>
   );
 }
 
