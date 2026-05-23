@@ -35,75 +35,94 @@ export default function Home() {
 
   return (
     <main style={{ maxWidth: 480, margin: "0 auto", padding: "32px 16px 80px" }}>
-      <div style={{ marginBottom: 32 }}>
-        <div style={{ fontSize: 13, color: "#ff6b35", fontWeight: 700, marginBottom: 8, letterSpacing: 2 }}>
-          RESET PILOT
+
+      {/* 헤더 */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <span className="flight-tag">✈️ RESET PILOT</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "#1DB4A8" }}>
+              <span className="status-dot" style={{ background: "#1DB4A8" }} />
+              ONLINE
+            </span>
+          </div>
+          <h1 style={{ fontSize: 24, fontWeight: 900, lineHeight: 1.35, color: "#1A1F36", margin: 0 }}>
+            오늘 망한 것 같아도,<br />
+            <span style={{ color: "#FF6B35" }}>아직 착륙은 가능해.</span>
+          </h1>
         </div>
-        <h1 style={{ fontSize: 26, fontWeight: 900, lineHeight: 1.35, marginBottom: 10 }}>
-          오늘 망한 것 같아도,<br />아직 착륙은 가능해 🛬
-        </h1>
-        <p style={{ color: "#888", fontSize: 14, lineHeight: 1.7 }}>
-          지금 상태를 솔직하게 입력해줘.<br />
-          AI가 감정과 사실을 분리하고,<br />
-          오늘 가능한 <strong style={{ color: "#f0f0f0" }}>3단계 복구 루트</strong>를 만들어줄게.
-        </p>
+        <button onClick={() => router.push("/history")} style={{ background: "transparent", border: "none", color: "#A0A8C0", fontSize: 22, cursor: "pointer" }}>
+          📦
+        </button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* 부제 */}
+      <p style={{ color: "#6B7494", fontSize: 13, lineHeight: 1.7, marginBottom: 24, padding: "12px 16px", background: "#F0F2F7", borderRadius: 10, borderLeft: "3px solid #0A2463" }}>
+        지금 상태를 솔직하게 입력해줘. AI가 감정과 사실을 분리하고 <strong style={{ color: "#1A1F36" }}>3단계 복구 루트</strong>를 만들어줄게.
+      </p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+        {/* 상태 입력 */}
         <div className="card">
-          <label style={{ fontSize: 13, color: "#888", marginBottom: 8, display: "block" }}>
-            지금 어떤 상태야? (자유롭게 써줘)
+          <label style={{ fontSize: 12, color: "#6B7494", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 16 }}>📡</span> 현재 상태 보고
           </label>
           <textarea
             rows={4}
-            placeholder="예: 3시에 잠들어서 11시에 일어남. 방 개판. 면접 결과 기다리느라 멘탈 나감. 공부 하나도 못했음."
+            placeholder="예: 오늘 늦게 일어났고 방이 너무 지저분해. 면접 결과 기다리느라 불안하고 아무것도 하기 싫어."
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
         </div>
 
+        {/* 에너지 */}
         <div className="card">
           <SliderItem
-            label="에너지"
+            label="연료 잔량 (에너지)"
             emoji={energy <= 3 ? "🪫" : energy <= 6 ? "🔋" : "⚡"}
             value={energy}
             onChange={setEnergy}
             low="방전"
-            high="넘침"
+            high="MAX"
+            color="#FF6B35"
           />
         </div>
 
+        {/* 불안 */}
         <div className="card">
           <SliderItem
-            label="불안 / 스트레스"
-            emoji={anxiety >= 8 ? "😵" : anxiety >= 5 ? "😰" : "😌"}
+            label="난기류 강도 (불안/스트레스)"
+            emoji={anxiety >= 8 ? "🌪️" : anxiety >= 5 ? "⛅" : "☀️"}
             value={anxiety}
             onChange={setAnxiety}
-            low="없음"
-            high="폭발"
+            low="잔잔"
+            high="폭풍"
+            color="#E53935"
           />
         </div>
 
+        {/* 남은 시간 */}
         <div className="card">
-          <label style={{ fontSize: 13, color: "#888", marginBottom: 12, display: "block" }}>
-            ⏰ 오늘 남은 시간
+          <label style={{ fontSize: 12, color: "#6B7494", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 16 }}>⏱️</span> 착륙까지 남은 시간
           </label>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8 }}>
             {["1시간 미만", "2시간", "3시간 이상", "종일"].map((t) => (
               <button
                 key={t}
                 onClick={() => setTimeLeft(t)}
                 style={{
-                  flex: 1,
-                  padding: "8px 0",
-                  borderRadius: 8,
-                  border: "1px solid",
-                  borderColor: timeLeft === t ? "#ff6b35" : "#2a2a2a",
-                  background: timeLeft === t ? "#ff6b35" : "transparent",
-                  color: timeLeft === t ? "white" : "#888",
-                  fontSize: 12,
-                  fontWeight: 600,
+                  padding: "10px 4px",
+                  borderRadius: 10,
+                  border: "1.5px solid",
+                  borderColor: timeLeft === t ? "#0A2463" : "#E2E6F0",
+                  background: timeLeft === t ? "#0A2463" : "transparent",
+                  color: timeLeft === t ? "white" : "#6B7494",
+                  fontSize: 11,
+                  fontWeight: 700,
                   cursor: "pointer",
+                  transition: "all 0.15s",
                 }}
               >
                 {t}
@@ -112,57 +131,34 @@ export default function Home() {
           </div>
         </div>
 
+        <div className="runway-divider">복구 루트 생성</div>
+
         <button className="btn-primary" onClick={handleSubmit} disabled={loading || !text.trim()}>
-          {loading ? "복구 루트 계산 중... 🛰️" : "비상 착륙 시작하기 🛬"}
+          {loading ? "🛰️ 복구 루트 계산 중..." : "✈️ 비상 착륙 시작하기"}
         </button>
 
-        <button
-          onClick={() => router.push("/history")}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: "#555",
-            fontSize: 13,
-            cursor: "pointer",
-            textAlign: "center",
-          }}
-        >
-          📦 블랙박스 (이전 기록)
-        </button>
       </div>
     </main>
   );
 }
 
-function SliderItem({
-  label, emoji, value, onChange, low, high,
-}: {
-  label: string;
-  emoji: string;
-  value: number;
-  onChange: (v: number) => void;
-  low: string;
-  high: string;
+function SliderItem({ label, emoji, value, onChange, low, high, color }: {
+  label: string; emoji: string; value: number;
+  onChange: (v: number) => void; low: string; high: string; color: string;
 }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        <span style={{ fontSize: 13, color: "#888" }}>{label}</span>
+        <span style={{ fontSize: 12, color: "#6B7494" }}>{label}</span>
         <span style={{ fontSize: 18 }}>
-          {emoji} <span style={{ fontWeight: 700, color: "#f0f0f0" }}>{value}</span>/10
+          {emoji} <span className="gauge" style={{ fontWeight: 900, color, fontSize: 16 }}>{value}</span>
+          <span style={{ fontSize: 11, color: "#A0A8C0" }}>/10</span>
         </span>
       </div>
-      <input
-        type="range"
-        min={1}
-        max={10}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="slider"
-      />
+      <input type="range" min={1} max={10} value={value} onChange={(e) => onChange(Number(e.target.value))} className="slider" />
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-        <span style={{ fontSize: 11, color: "#444" }}>{low}</span>
-        <span style={{ fontSize: 11, color: "#444" }}>{high}</span>
+        <span style={{ fontSize: 11, color: "#C8CFDE" }}>{low}</span>
+        <span style={{ fontSize: 11, color: "#C8CFDE" }}>{high}</span>
       </div>
     </>
   );
