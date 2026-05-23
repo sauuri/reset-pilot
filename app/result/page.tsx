@@ -238,17 +238,15 @@ function ResultContent() {
           {/* 체크 피드백 */}
           {anyDone && (
             <div style={{
-              marginTop: 12, padding: "10px 14px",
-              background: allDone ? "rgba(29,180,168,0.12)" : "rgba(29,180,168,0.07)",
-              border: `1px solid ${allDone ? "#1DB4A8" : "rgba(29,180,168,0.3)"}`,
-              borderRadius: 10,
-              fontSize: 13, fontWeight: 700,
-              color: "#1DB4A8",
+              marginTop: 12, padding: "10px 16px",
+              background: allDone ? "rgba(29,180,168,0.14)" : "rgba(29,180,168,0.07)",
+              border: `1.5px solid ${allDone ? "#1DB4A8" : "rgba(29,180,168,0.3)"}`,
+              borderRadius: 10, fontSize: 13, fontWeight: 700, color: "#1DB4A8",
               transition: "all 0.3s",
             }}>
-              {allDone
-                ? "🛬 오늘 완전히 착륙했어. 진짜 잘했어."
-                : `✓ 오늘 0점은 아니야. ${checkedCount}개 했어.`}
+              {checkedCount === 1 && "✓ 오늘은 0점은 아니에요."}
+              {checkedCount === 2 && "✓✓ 흐름이 조금 돌아오고 있어요."}
+              {checkedCount === 3 && "🛬 복구 완료. 오늘 충분히 잘 막았어요."}
             </div>
           )}
         </div>

@@ -36,14 +36,16 @@ function getMoonPos(h: number) {
   return { x: t * 78 + 11, y: 80 - Math.sin(t * Math.PI) * 60 };
 }
 
-const STARS = Array.from({ length: 70 }, (_, i) => ({
-  x:       (i * 137.508 + 23) % 100,
-  y:       (i * 97.432  + 17) % 63,
-  size:    [1, 1, 2, 1, 2, 1, 3][i % 7],
-  opacity: 0.5 + (i % 4) * 0.12,
-  twinkle: i % 3 === 0,
-  delay:   ((i * 0.37) % 4).toFixed(1),
-  dur:     (1.8 + (i % 3) * 0.7).toFixed(1),
+// sin 기반 시드 난수 — 규칙적인 대각선 패턴 방지
+const sr = (s: number) => { const x = Math.sin(s) * 43758.5453; return x - Math.floor(x); };
+const STARS = Array.from({ length: 80 }, (_, i) => ({
+  x:       sr(i * 7.3891 + 1.1) * 100,
+  y:       sr(i * 3.1415 + 2.7) * 65,
+  size:    sr(i * 1.618) > 0.85 ? 3 : sr(i * 1.618) > 0.6 ? 2 : 1,
+  opacity: 0.4 + sr(i * 5.2) * 0.55,
+  twinkle: sr(i * 9.1) > 0.65,
+  delay:   (sr(i * 2.718) * 4).toFixed(1),
+  dur:     (1.4 + sr(i * 0.577) * 2.2).toFixed(1),
 }));
 
 export default function SkyBackground() {

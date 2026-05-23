@@ -83,12 +83,28 @@ export default function Home() {
             {/* 상태 입력 */}
             <div>
               <div className="ticket-label">현재 상태 — 오늘 어떤 하루였어?</div>
+              {/* 빠른 태그 */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "8px 0" }}>
+                {["늦게 일어남", "무기력함", "불안함", "방 엉망", "할 일 많음", "폰만 봄", "아무것도 하기 싫음"].map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => setText((prev) => prev ? `${prev}, ${tag}` : tag)}
+                    style={{
+                      fontSize: 11, fontWeight: 700, padding: "5px 10px", borderRadius: 20,
+                      border: "1.5px solid rgba(165,210,238,0.55)",
+                      background: "rgba(255,255,255,0.35)", backdropFilter: "blur(4px)",
+                      color: "#2a4a60", cursor: "pointer", transition: "all 0.15s",
+                    }}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
               <textarea
-                rows={4}
-                placeholder="예: 오늘 늦게 일어났고 방이 지저분해. 해야 할 게 많은데 손이 안 가고 멍하게 있었어."
+                rows={3}
+                placeholder="또는 직접 입력: 오늘 늦게 일어났고 방이 지저분해. 해야 할 게 많은데 손이 안 가."
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                style={{ marginTop: 6 }}
               />
             </div>
 
