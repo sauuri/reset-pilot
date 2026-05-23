@@ -11,6 +11,11 @@ interface LogEntry {
   successCriteria: string;
   actions: { title: string }[];
   mode?: string;
+  energy?: number;
+  anxiety?: number;
+  completedCount?: number;
+  completedActions?: string[];
+  moodAfter?: "better" | "same" | "worse" | null;
 }
 
 export default function HistoryPage() {
@@ -48,6 +53,23 @@ export default function HistoryPage() {
         </button>
       </div>
 
+      {log.length >= 3 && (
+        <div style={{ marginBottom: 16 }}>
+          <button
+            onClick={() => router.push("/insights")}
+            style={{
+              width: "100%", padding: "12px 20px", borderRadius: 12,
+              background: "linear-gradient(135deg, #0A2463 0%, #163678 100%)",
+              border: "1px solid rgba(255,255,255,0.15)",
+              color: "white", fontSize: 14, fontWeight: 700, cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}
+          >
+            📊 패턴 분석 보기
+          </button>
+        </div>
+      )}
+
       {log.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0" }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div>
@@ -72,9 +94,17 @@ export default function HistoryPage() {
                 <div className="ticket-body" style={{ padding: "14px 18px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                     <span style={{ fontSize: 11, color: "#7facca", fontWeight: 600 }}>{entry.date}</span>
-                    <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                       <span style={{ fontSize: 11, color: "#E53935", fontWeight: 700 }}>부담 {entry.ruinScore ?? "?"}%</span>
                       <span style={{ fontSize: 11, color: "#1DB4A8", fontWeight: 700 }}>회복 {entry.recoverScore ?? "?"}%</span>
+                      {entry.completedCount !== undefined && (
+                        <span style={{ fontSize: 11, color: "#F59E0B", fontWeight: 700 }}>✓ {entry.completedCount}/3</span>
+                      )}
+                      {entry.moodAfter && (
+                        <span style={{ fontSize: 13 }}>
+                          {entry.moodAfter === "better" ? "😊" : entry.moodAfter === "same" ? "😐" : "😔"}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div style={{ fontSize: 13, color: "#4e6e82", marginBottom: 10, lineHeight: 1.55 }}>

@@ -25,7 +25,7 @@ export default function Home() {
       const data = await res.json();
       localStorage.setItem("resetResult", JSON.stringify(data));
       const log = JSON.parse(localStorage.getItem("resetLog") || "[]");
-      log.unshift({ ...data, date: new Date().toLocaleDateString("ko-KR"), input: text });
+      log.unshift({ ...data, date: new Date().toLocaleDateString("ko-KR"), input: text, energy, anxiety, completedCount: 0, completedActions: [], moodAfter: null });
       localStorage.setItem("resetLog", JSON.stringify(log.slice(0, 30)));
       setFlightStatus("arrived");
       setTimeout(() => router.push("/result"), 900);

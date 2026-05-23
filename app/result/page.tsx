@@ -24,10 +24,10 @@ interface ResetResult {
   message: string;
 }
 
-const MODE_CONFIG: Record<string, { color: string; bg: string; border: string; icon: string; label: string }> = {
-  "Crash Mode":  { color: "#E53935", bg: "#FFF5F5", border: "#FFCDD2", icon: "🔴", label: "회복 우선 모드" },
-  "Drift Mode":  { color: "#F59E0B", bg: "#FFFBEB", border: "#FDE68A", icon: "🟡", label: "방향 전환 모드" },
-  "Launch Mode": { color: "#1DB4A8", bg: "#F0FDFC", border: "#99F6E4", icon: "🟢", label: "실행 모드" },
+const MODE_CONFIG: Record<string, { color: string; bg: string; border: string; icon: string; label: string; en: string }> = {
+  "Crash Mode":  { color: "#E53935", bg: "#FFF5F5", border: "#FFCDD2", icon: "🔴", label: "회복 우선 모드", en: "Crash Mode" },
+  "Drift Mode":  { color: "#F59E0B", bg: "#FFFBEB", border: "#FDE68A", icon: "🟡", label: "방향 전환 모드", en: "Drift Mode" },
+  "Launch Mode": { color: "#1DB4A8", bg: "#F0FDFC", border: "#99F6E4", icon: "🟢", label: "실행 모드",     en: "Launch Mode" },
 };
 
 const SAMPLE: ResetResult = {
@@ -75,6 +75,7 @@ function ResultContent() {
   const [result, setResult] = useState<ResetResult | null>(null);
   const [noData, setNoData] = useState(false);
   const [checked, setChecked] = useState<boolean[]>([false, false, false]);
+  const [moodAfter, setMoodAfter] = useState<"better" | "same" | "worse" | null>(null);
 
   useEffect(() => {
     if (isDemo) { setResult(SAMPLE); return; }
@@ -82,6 +83,27 @@ function ResultContent() {
     if (!raw) { setNoData(true); return; }
     setResult(JSON.parse(raw));
   }, [isDemo]);
+
+  useEffect(() => {
+    if (isDemo || !result) return;
+    const raw = localStorage.getItem("resetLog");
+    if (!raw) return;
+    const log = JSON.parse(raw);
+    if (log.length === 0) return;
+    const completedActions = result.actions.filter((_, i) => checked[i]).map(a => a.title);
+    log[0] = { ...log[0], completedCount: checked.filter(Boolean).length, completedActions };
+    localStorage.setItem("resetLog", JSON.stringify(log));
+  }, [checked, isDemo, result]);
+
+  useEffect(() => {
+    if (isDemo || moodAfter === null) return;
+    const raw = localStorage.getItem("resetLog");
+    if (!raw) return;
+    const log = JSON.parse(raw);
+    if (log.length === 0) return;
+    log[0] = { ...log[0], moodAfter };
+    localStorage.setItem("resetLog", JSON.stringify(log));
+  }, [moodAfter, isDemo]);
 
   /* 데이터 없음 — 빈 상태 */
   if (noData) {
@@ -145,9 +167,13 @@ function ResultContent() {
                 display: "inline-flex", alignItems: "center", gap: 6,
                 background: modeStyle.bg, color: modeStyle.color,
                 border: `1px solid ${modeStyle.border}`,
-                fontSize: 12, fontWeight: 800, padding: "4px 12px", borderRadius: 20,
+                padding: "5px 12px", borderRadius: 20,
               }}>
-                {modeStyle.icon} {modeStyle.label}
+                {modeStyle.icon}
+                <span style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
+                  <span style={{ fontSize: 12, fontWeight: 800 }}>{modeStyle.label}</span>
+                  <span style={{ fontSize: 9, fontWeight: 600, opacity: 0.65 }}>{modeStyle.en}</span>
+                </span>
               </span>
             </div>
             <div style={{ textAlign: "right" }}>
@@ -286,10 +312,50 @@ function ResultContent() {
             <div className="barcode" style={{ width: 56, flexShrink: 0, marginTop: 4 }} />
           </div>
           <div style={{ marginTop: 8, fontSize: 9, color: "#b8d5e8", letterSpacing: 1 }}>
-            RST-001 · {modeStyle.label.toUpperCase()} · GATE 3 · TODAY
+            RST-001 · {modeStyle.label} · GATE 3 · TODAY
           </div>
         </div>
       </div>
+
+      {/* 기분 체크 */}
+      {anyDone && (
+        <div className="ticket animate-fadeInUp" style={{ marginBottom: 14 }}>
+          <div className="ticket-body" style={{ padding: "16px 20px" }}>
+            <div className="ticket-label" style={{ marginBottom: 10 }}>💬 지금 기분은?</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {([
+                { value: "better" as const, emoji: "😊", label: "나아짐" },
+                { value: "same"   as const, emoji: "😐", label: "비슷" },
+                { value: "worse"  as const, emoji: "😔", label: "더 힘듦" },
+              ]).map(({ value, emoji, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setMoodAfter(value)}
+                  style={{
+                    flex: 1, padding: "10px 6px", borderRadius: 10,
+                    border: "1.5px solid",
+                    borderColor: moodAfter === value ? "#0A2463" : "rgba(165,210,238,0.5)",
+                    background: moodAfter === value ? "#0A2463" : "rgba(255,255,255,0.4)",
+                    color: moodAfter === value ? "white" : "#4e6e82",
+                    fontSize: 13, fontWeight: 700, cursor: "pointer", transition: "all 0.15s",
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                  }}
+                >
+                  <span style={{ fontSize: 22 }}>{emoji}</span>
+                  <span style={{ fontSize: 11 }}>{label}</span>
+                </button>
+              ))}
+            </div>
+            {moodAfter && (
+              <div style={{ marginTop: 10, fontSize: 12, color: "#1DB4A8", fontWeight: 700, textAlign: "center" }}>
+                {moodAfter === "better" && "✓ 기록됐어요. 좋은 흐름이에요!"}
+                {moodAfter === "same"   && "✓ 기록됐어요. 그래도 오늘 버텼어요."}
+                {moodAfter === "worse"  && "✓ 기록됐어요. 솔직하게 알려줘서 고마워요."}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 현실 체크 */}
       <div className="ticket animate-fadeInUp animate-delay-1" style={{ marginBottom: 14 }}>
