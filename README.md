@@ -9,6 +9,12 @@
 
 > 지금 이 순간부터 다시 시작하는 리셋 앱.
 
+## 스크린샷
+
+<p align="center">
+  <img src="docs/screenshots/01_home.png" width="30%"/>
+</p>
+
 ## 기술 스택
 
 - **Frontend**: Next.js (App Router)
