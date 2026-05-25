@@ -17,7 +17,8 @@ export default function Home() {
     setLoading(true);
     setFlightStatus("flying");
     try {
-      const res = await fetch("/api/reset", {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
+      const res = await fetch(`${apiBase}/api/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, energy, anxiety, timeLeft }),

@@ -62,5 +62,22 @@ JSON 형식:
   const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
   const result = JSON.parse(cleaned);
 
-  return Response.json(result);
+  return Response.json(result, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
+}
+
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
 }
