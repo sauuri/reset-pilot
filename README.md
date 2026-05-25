@@ -12,7 +12,11 @@
 ## 스크린샷
 
 <p align="center">
-  <img src="docs/screenshots/01_home.png" width="30%"/>
+  <img src="docs/screenshots/01_main.png" width="18%"/>
+  <img src="docs/screenshots/02_filled.png" width="18%"/>
+  <img src="docs/screenshots/05_result.png" width="18%"/>
+  <img src="docs/screenshots/04_insights_top.png" width="18%"/>
+  <img src="docs/screenshots/03_history.png" width="18%"/>
 </p>
 
 ## 기술 스택
