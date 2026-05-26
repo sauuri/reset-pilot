@@ -52,23 +52,38 @@ JSON 형식:
 
 행동은 남은 시간(${timeLeft}), 에너지(${energy}/10)에 맞게 실제로 할 수 있는 것으로만 줘.`;
 
-  const response = await client.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.8,
-  });
+  try {
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.8,
+    });
 
-  const raw = response.choices[0].message.content ?? "{}";
-  const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  const result = JSON.parse(cleaned);
+    const raw = response.choices[0].message.content ?? "{}";
+    const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const result = JSON.parse(cleaned);
 
-  return Response.json(result, {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+    return Response.json(result, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
+  } catch (err) {
+    console.error("Reset API error:", err);
+    return Response.json(
+      { error: "AI 응답 생성에 실패했습니다. 잠시 후 다시 시도해주세요." },
+      {
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      }
+    );
+  }
 }
 
 export async function OPTIONS() {

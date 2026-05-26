@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Reset Pilot',
   webDir: 'out',
   server: {
-    allowNavigation: ['reset-pilot.vercel.app'],
+    url: 'https://reset-pilot.vercel.app',
+    cleartext: false,
   },
   ios: {
     contentInset: 'automatic',
