@@ -84,6 +84,8 @@ export default function SkyBackground() {
 
   return (
     <>
+      {/* 상단 safe area 덮개 — 스크롤 시 콘텐츠 비침 방지 */}
+      <div style={{ position:"fixed", top:0, left:0, right:0, height:"env(safe-area-inset-top, 0px)", background:SKY_TOP[mode], zIndex:9998, pointerEvents:"none" }} />
       {/* 하늘 */}
       <div style={{ position:"fixed", inset:0, background:GRADIENTS[mode], zIndex:-1, pointerEvents:"none", transition:"background 5s ease" }} />
 
