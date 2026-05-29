@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LandingAnimation from "../components/LandingAnimation";
+import { updateLogInSupabase } from "../utils/logs";
 
 interface Action {
   name: string;
@@ -93,8 +94,10 @@ function ResultContent() {
     const log = JSON.parse(raw);
     if (log.length === 0) return;
     const completedActions = result.actions.filter((_, i) => checked[i]).map(a => a.title);
-    log[0] = { ...log[0], completedCount: checked.filter(Boolean).length, completedActions };
+    const completedCount = checked.filter(Boolean).length;
+    log[0] = { ...log[0], completedCount, completedActions };
     localStorage.setItem("resetLog", JSON.stringify(log));
+    if (log[0].ts) updateLogInSupabase(log[0].ts, { completedActions, completedCount });
   }, [checked, isDemo, result]);
 
   useEffect(() => {
@@ -105,6 +108,7 @@ function ResultContent() {
     if (log.length === 0) return;
     log[0] = { ...log[0], moodAfter };
     localStorage.setItem("resetLog", JSON.stringify(log));
+    if (log[0].ts) updateLogInSupabase(log[0].ts, { moodAfter });
   }, [moodAfter, isDemo]);
 
   /* 데이터 없음 — 빈 상태 */

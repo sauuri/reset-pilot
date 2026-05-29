@@ -28,7 +28,7 @@ export async function saveLogToSupabase(log: Record<string, unknown>) {
 
 export async function updateLogInSupabase(
   ts: number,
-  update: { completedActions?: string[]; completedCount?: number; moodAfter?: number | null }
+  update: { completedActions?: string[]; completedCount?: number; moodAfter?: "better" | "same" | "worse" | null }
 ) {
   const user = await getUser();
   if (!user) return;
