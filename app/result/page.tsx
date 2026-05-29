@@ -601,22 +601,34 @@ function ResultContent() {
       {/* 오늘의 한 줄 일기 */}
       {!isDemo && (
         <div className="ticket animate-fadeInUp" style={{ marginBottom: 14 }}>
-          <div className="ticket-body" style={{ padding: "16px 20px" }}>
-            <div className="ticket-label" style={{ marginBottom: 8 }}>✏️ 오늘 잘 한 것 하나 (선택)</div>
-            <textarea
-              rows={2}
-              placeholder="아주 작은 것도 괜찮아요. '물 한 잔 마셨다'도 충분해요."
-              value={journal}
-              onChange={e => setJournal(e.target.value)}
-              style={{ width: "100%", resize: "none", fontSize: 13 }}
-            />
-            {journal.trim() && (
-              <button
-                onClick={saveJournal}
-                style={{ marginTop: 8, width: "100%", padding: "10px", borderRadius: 10, border: "none", cursor: "pointer", background: journalSaved ? "rgba(29,180,168,0.15)" : "rgba(10,36,99,0.08)", color: journalSaved ? "#1DB4A8" : "#4e6e82", fontSize: 13, fontWeight: 700, transition: "all 0.2s" }}
-              >
-                {journalSaved ? "✓ 저장됐어요!" : "저장하기"}
-              </button>
+          <div className="ticket-header" style={{ padding: "12px 20px" }}>
+            <div className="ticket-label" style={{ color: "rgba(255,255,255,0.5)" }}>✏️ 오늘의 한 줄</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>잘 한 것 하나, 또는 오늘을 한 마디로 — 아주 작아도 괜찮아요</div>
+          </div>
+          <div className="ticket-body" style={{ padding: "14px 20px" }}>
+            {journalSaved ? (
+              <div style={{ padding: "12px 14px", background: "rgba(255,245,220,0.7)", borderRadius: 10, borderLeft: "3px solid #F59E0B" }}>
+                <div style={{ fontSize: 9, color: "#F59E0B", fontWeight: 700, letterSpacing: 1, marginBottom: 4 }}>TODAY&apos;S NOTE</div>
+                <div style={{ fontSize: 13, color: "#4e6e82", lineHeight: 1.6, fontStyle: "italic" }}>"{journal}"</div>
+                <button onClick={() => setJournalSaved(false)} style={{ marginTop: 8, background: "none", border: "none", fontSize: 11, color: "#9ab8cc", cursor: "pointer" }}>수정하기</button>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  rows={2}
+                  placeholder="물 한 잔 마셨다 / 오늘 버텼다 / 조금 나아진 것 같다…"
+                  value={journal}
+                  onChange={e => setJournal(e.target.value)}
+                  style={{ width: "100%", resize: "none", fontSize: 13, borderRadius: 10, border: "1.5px solid rgba(245,158,11,0.35)", background: "rgba(255,251,235,0.6)", padding: "10px 12px", color: "#4e6e82", outline: "none" }}
+                />
+                <button
+                  onClick={saveJournal}
+                  disabled={!journal.trim()}
+                  style={{ marginTop: 8, width: "100%", padding: "11px", borderRadius: 10, border: "none", cursor: journal.trim() ? "pointer" : "default", background: journal.trim() ? "linear-gradient(135deg, #F59E0B, #d97706)" : "rgba(245,158,11,0.15)", color: journal.trim() ? "white" : "#9ab8cc", fontSize: 13, fontWeight: 800, transition: "all 0.2s" }}
+                >
+                  ✏️ 저장하기
+                </button>
+              </>
             )}
           </div>
         </div>

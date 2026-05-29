@@ -18,6 +18,7 @@ interface LogEntry {
   completedCount?: number;
   completedActions?: string[];
   moodAfter?: "better" | "same" | "worse" | null;
+  journal?: string;
   _id?: string;
 }
 
@@ -228,49 +229,81 @@ export default function HistoryPage() {
         const total = log.length;
         const cur = getCurrentBadge(total);
         const next = getNextBadge(total);
-        const prev = cur ? BADGES[BADGES.indexOf(cur as typeof BADGES[number]) - 1] ?? null : null;
+        const badgeIdx = cur ? BADGES.indexOf(cur as typeof BADGES[number]) : -1;
+        const prev = badgeIdx > 0 ? BADGES[badgeIdx - 1] : null;
         const from = prev ? prev.count : 0;
         const to = next ? next.count : (cur?.count ?? 1);
         const progress = next ? Math.round(((total - from) / (to - from)) * 100) : 100;
+
+        // 등급별 색상
+        const RANK_COLORS: Record<number, { border: string; glow: string; label: string }> = {
+          1:   { border: "#CD7F32", glow: "rgba(205,127,50,0.35)",  label: "BRONZE"   },
+          5:   { border: "#CD7F32", glow: "rgba(205,127,50,0.35)",  label: "BRONZE"   },
+          10:  { border: "#B0C4DE", glow: "rgba(176,196,222,0.4)",  label: "SILVER"   },
+          30:  { border: "#4A90D9", glow: "rgba(74,144,217,0.4)",   label: "BLUE"     },
+          50:  { border: "#4A90D9", glow: "rgba(74,144,217,0.4)",   label: "BLUE"     },
+          100: { border: "#FFD700", glow: "rgba(255,215,0,0.45)",   label: "GOLD"     },
+          150: { border: "#FFD700", glow: "rgba(255,215,0,0.45)",   label: "GOLD"     },
+          200: { border: "#B39DDB", glow: "rgba(179,157,219,0.45)", label: "PLATINUM" },
+          250: { border: "#B39DDB", glow: "rgba(179,157,219,0.45)", label: "PLATINUM" },
+          300: { border: "#00FFFF", glow: "rgba(0,255,255,0.4)",    label: "LEGEND"   },
+        };
+
         return (
           <div className="ticket" style={{ marginBottom: 16 }}>
             <div className="ticket-header" style={{ padding: "14px 20px" }}>
-              <div style={{ fontSize: 9, letterSpacing: 2, color: "rgba(255,255,255,0.4)", marginBottom: 6 }}>MY FLIGHT RECORD</div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ fontSize: 9, letterSpacing: 2, color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>MY FLIGHT RECORD</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                 <div>
-                  <div style={{ fontSize: 28, lineHeight: 1, marginBottom: 4 }}>{cur?.emoji ?? "🛫"}</div>
-                  <div style={{ fontSize: 17, fontWeight: 900, color: "white" }}>{cur?.name ?? "첫 이륙 준비 중"}</div>
-                  {cur && <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{cur.desc}</div>}
+                  <div style={{ fontSize: 32, lineHeight: 1, marginBottom: 4 }}>{cur?.emoji ?? "🛫"}</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: "white" }}>{cur?.name ?? "이륙 준비 중"}</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div className="gauge" style={{ fontSize: 38, fontWeight: 900, color: "#6ee7e0", lineHeight: 1 }}>{total}</div>
+                  <div className="gauge" style={{ fontSize: 42, fontWeight: 900, color: "#6ee7e0", lineHeight: 1 }}>{total}</div>
                   <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>총 복구 횟수</div>
                 </div>
               </div>
-            </div>
-            <div className="ticket-body" style={{ padding: "14px 20px" }}>
-              {next ? (
+              {next && (
                 <>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1A1F36" }}>다음 뱃지: {next.emoji} {next.name}</span>
-                    <span style={{ fontSize: 11, color: "#1DB4A8", fontWeight: 700 }}>{next.count - total}회 남음</span>
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>다음: {next.emoji} {next.name}</span>
+                    <span style={{ fontSize: 11, color: "#6ee7e0", fontWeight: 700 }}>{next.count - total}회 남음</span>
                   </div>
-                  <div style={{ height: 8, background: "rgba(165,210,238,0.3)", borderRadius: 4, overflow: "hidden", marginBottom: 8 }}>
-                    <div style={{ height: "100%", width: `${progress}%`, background: "linear-gradient(90deg, #1DB4A8, #5ce0d8)", borderRadius: 4, transition: "width 0.5s" }} />
+                  <div style={{ height: 6, background: "rgba(255,255,255,0.15)", borderRadius: 3, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${progress}%`, background: "linear-gradient(90deg, #6ee7e0, #1DB4A8)", borderRadius: 3, transition: "width 0.6s" }} />
                   </div>
-                  <div style={{ fontSize: 10, color: "#9ab8cc", textAlign: "right" }}>{total - from} / {to - from}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textAlign: "right", marginTop: 4 }}>{total - from} / {to - from}</div>
                 </>
-              ) : (
-                <div style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#1DB4A8" }}>🌌 최고 등급 달성! 레전드 파일럿이에요.</div>
               )}
-              {/* 획득 뱃지 전체 */}
-              <div style={{ marginTop: 12, display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {!next && <div style={{ fontSize: 13, fontWeight: 800, color: "#6ee7e0", textAlign: "center", marginTop: 4 }}>🌌 레전드 파일럿 달성!</div>}
+            </div>
+
+            <div className="ticket-body" style={{ padding: "16px" }}>
+              <div style={{ fontSize: 10, color: "#9ab8cc", fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>BADGES COLLECTION</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 {BADGES.map(b => {
                   const unlocked = total >= b.count;
+                  const rc = RANK_COLORS[b.count];
                   return (
-                    <div key={b.count} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 20, background: unlocked ? "rgba(29,180,168,0.12)" : "rgba(165,210,238,0.08)", border: `1px solid ${unlocked ? "rgba(29,180,168,0.4)" : "rgba(165,210,238,0.2)"}`, opacity: unlocked ? 1 : 0.45 }}>
-                      <span style={{ fontSize: 13 }}>{b.emoji}</span>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: unlocked ? "#1A1F36" : "#9ab8cc" }}>{b.name}</span>
+                    <div key={b.count} style={{
+                      borderRadius: 14, overflow: "hidden",
+                      border: `2px solid ${unlocked ? rc.border : "rgba(165,210,238,0.15)"}`,
+                      background: unlocked ? `linear-gradient(135deg, rgba(255,255,255,0.92), rgba(240,248,255,0.88))` : "rgba(255,255,255,0.06)",
+                      boxShadow: unlocked ? `0 0 12px ${rc.glow}, 0 2px 8px rgba(0,0,0,0.1)` : "none",
+                      position: "relative",
+                      opacity: unlocked ? 1 : 0.5,
+                    }}>
+                      {/* 등급 라벨 */}
+                      <div style={{ background: unlocked ? rc.border : "rgba(165,210,238,0.2)", padding: "3px 0", textAlign: "center" }}>
+                        <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: 1.5, color: unlocked ? "white" : "rgba(255,255,255,0.4)" }}>{rc.label}</span>
+                      </div>
+                      <div style={{ padding: "12px 10px 10px", textAlign: "center" }}>
+                        <div style={{ fontSize: 32, lineHeight: 1, marginBottom: 6, filter: unlocked ? "none" : "grayscale(1) opacity(0.4)" }}>
+                          {unlocked ? b.emoji : "🔒"}
+                        </div>
+                        <div style={{ fontSize: 12, fontWeight: 900, color: unlocked ? "#0A2463" : "#9ab8cc", marginBottom: 3, lineHeight: 1.2 }}>{b.name}</div>
+                        <div style={{ fontSize: 10, color: unlocked ? "#4e6e82" : "#9ab8cc" }}>{b.count}회 달성</div>
+                      </div>
                     </div>
                   );
                 })}
@@ -363,6 +396,12 @@ export default function HistoryPage() {
                           {a.title}
                         </span>
                       ))}
+                    </div>
+                  )}
+                  {entry.journal && (
+                    <div style={{ marginTop: 10, padding: "8px 12px", background: "rgba(255,245,220,0.6)", borderRadius: 8, borderLeft: "3px solid #F59E0B" }}>
+                      <div style={{ fontSize: 9, color: "#F59E0B", fontWeight: 700, letterSpacing: 1, marginBottom: 3 }}>✏️ 오늘의 한 줄</div>
+                      <div style={{ fontSize: 12, color: "#4e6e82", lineHeight: 1.5, fontStyle: "italic" }}>"{entry.journal}"</div>
                     </div>
                   )}
                 </div>
