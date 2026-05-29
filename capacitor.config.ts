@@ -9,8 +9,7 @@ const config: CapacitorConfig = {
     allowNavigation: ['*.apple.com', 'appleid.apple.com', '*.supabase.co'],
   },
   ios: {
-    contentInset: 'automatic',
-    backgroundColor: '#3fa3d5',
+    contentInset: 'never',
   },
 };
 

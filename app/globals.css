@@ -45,6 +45,10 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+main {
+  padding-top: max(12px, env(safe-area-inset-top, 12px));
+}
+
 /* 격자 */
 body::before {
   content: '';
