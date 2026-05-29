@@ -95,6 +95,27 @@ function ResultContent() {
   const [showLanding, setShowLanding] = useState(false);
   const [timer, setTimer] = useState<TimerState | null>(null);
   const timerRef = useEffect;
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!result || isDemo) return;
+    const plans: ResetResult[] = JSON.parse(localStorage.getItem("savedPlans") || "[]");
+    setSaved(plans.some(p => p.recoveryGoal === result.recoveryGoal && p.mode === result.mode));
+  }, [result, isDemo]);
+
+  function toggleSave() {
+    if (!result || isDemo) return;
+    const plans: ResetResult[] = JSON.parse(localStorage.getItem("savedPlans") || "[]");
+    if (saved) {
+      const next = plans.filter(p => !(p.recoveryGoal === result.recoveryGoal && p.mode === result.mode));
+      localStorage.setItem("savedPlans", JSON.stringify(next));
+      setSaved(false);
+    } else {
+      plans.unshift(result);
+      localStorage.setItem("savedPlans", JSON.stringify(plans.slice(0, 20)));
+      setSaved(true);
+    }
+  }
 
   // 타이머 카운트다운
   timerRef(() => {
@@ -313,9 +334,16 @@ function ResultContent() {
       {/* 헤더 */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <span className="flight-tag">✈️ RESET PILOT</span>
-        <button onClick={() => router.push("/")} style={{ background: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.35)", color: "white", fontSize: 12, padding: "6px 12px", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}>
-          ← 다시 입력
-        </button>
+        <div style={{ display: "flex", gap: 6 }}>
+          {!isDemo && (
+            <button onClick={toggleSave} style={{ background: saved ? "rgba(255,180,0,0.2)" : "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: `1px solid ${saved ? "rgba(255,180,0,0.4)" : "rgba(255,255,255,0.25)"}`, color: saved ? "#FFB830" : "rgba(255,255,255,0.6)", fontSize: 16, padding: "6px 10px", borderRadius: 8, cursor: "pointer" }} title={saved ? "저장됨" : "플랜 저장"}>
+              {saved ? "⭐" : "☆"}
+            </button>
+          )}
+          <button onClick={() => router.push("/")} style={{ background: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.35)", color: "white", fontSize: 12, padding: "6px 12px", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}>
+            ← 다시 입력
+          </button>
+        </div>
       </div>
 
       {/* 메인 탑승권 */}

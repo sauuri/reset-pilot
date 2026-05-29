@@ -199,6 +199,55 @@ export default function InsightsPage() {
         </button>
       </div>
 
+      {/* 📅 위클리 리포트 */}
+      {(() => {
+        const now = new Date();
+        const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+        const weekLog = log.filter(e => {
+          try {
+            const parts = e.date.replace(/\.\s*/g, "-").replace(/-$/, "").split("-").map(Number);
+            const d = new Date(parts[0], parts[1] - 1, parts[2]);
+            return d >= weekAgo;
+          } catch { return false; }
+        });
+        if (weekLog.length === 0) return null;
+        const avgRuin = Math.round(weekLog.reduce((s, e) => s + (e.ruinScore ?? 0), 0) / weekLog.length);
+        const avgDone = (weekLog.reduce((s, e) => s + (e.completedCount ?? 0), 0) / weekLog.length).toFixed(1);
+        const bestDay = weekLog.filter(e => (e.completedCount ?? 0) === 3);
+        const moodBetter = weekLog.filter(e => e.moodAfter === "better").length;
+        return (
+          <div className="ticket animate-fadeInUp" style={{ marginBottom: 14 }}>
+            <div className="ticket-header" style={{ padding: "12px 20px" }}>
+              <div className="ticket-label" style={{ color: "rgba(255,255,255,0.5)" }}>📅 이번 주 복구 리포트</div>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>최근 7일 · {weekLog.length}일 기록</div>
+            </div>
+            <div className="ticket-body">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 14 }}>
+                <div style={{ textAlign: "center" }}>
+                  <div className="gauge" style={{ fontSize: 22, fontWeight: 900, color: "#E53935" }}>{avgRuin}%</div>
+                  <div style={{ fontSize: 10, color: "#7facca", marginTop: 2 }}>평균 부담도</div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div className="gauge" style={{ fontSize: 22, fontWeight: 900, color: "#1DB4A8" }}>{avgDone}/3</div>
+                  <div style={{ fontSize: 10, color: "#7facca", marginTop: 2 }}>평균 완료</div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div className="gauge" style={{ fontSize: 22, fontWeight: 900, color: "#F59E0B" }}>{weekLog.length}일</div>
+                  <div style={{ fontSize: 10, color: "#7facca", marginTop: 2 }}>복구 시도</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1F36", padding: "10px 14px", background: "rgba(240,247,252,0.85)", borderRadius: 10, lineHeight: 1.6 }}>
+                {bestDay.length > 0
+                  ? `✈️ ${bestDay.length}일은 모든 행동을 완료했어요. ${moodBetter > 0 ? `${moodBetter}번은 기분도 나아졌어요.` : ""}`
+                  : moodBetter > 0
+                  ? `😊 ${moodBetter}번은 복구 후 기분이 나아졌어요. 흐름이 있어요.`
+                  : `이번 주도 포기하지 않고 ${weekLog.length}번 복구를 시도했어요. 그게 이미 대단한 거예요.`}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 🧠 AI 패턴 요약 */}
       <div className="ticket animate-fadeInUp" style={{ marginBottom: 14 }}>
         <div className="ticket-header" style={{ padding: "12px 20px" }}>

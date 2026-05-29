@@ -5,18 +5,21 @@ import { useRouter } from "next/navigation";
 import SplashScreen from "./components/SplashScreen";
 import LoadingScreen from "./components/LoadingScreen";
 import TakeoffAnimation from "./components/TakeoffAnimation";
+import Onboarding from "./components/Onboarding";
 import { supabase } from "./utils/supabase";
 import { saveLogToSupabase } from "./utils/logs";
 
 export default function Home() {
   const router = useRouter();
   const [showSplash, setShowSplash] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [text, setText] = useState("");
   const [user, setUser] = useState<{ id: string; email?: string } | null | undefined>(undefined);
 
   useEffect(() => {
     if (!sessionStorage.getItem("rp_entered")) setShowSplash(true);
+    if (!localStorage.getItem("rp_onboarded")) setShowOnboarding(true);
     setInitialized(true);
     supabase.auth.getUser().then(({ data, error }) => {
       if (error) { setUser(null); return; }
@@ -33,6 +36,30 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState("2시간");
   const [loading, setLoading] = useState(false);
   const [flightStatus, setFlightStatus] = useState<"ready" | "flying" | "arrived">("ready");
+  const [streak, setStreak] = useState(0);
+  const [quickMode, setQuickMode] = useState(false);
+
+  useEffect(() => {
+    const raw = localStorage.getItem("resetLog");
+    if (!raw) return;
+    const logs: Array<{ date: string }> = JSON.parse(raw);
+    if (logs.length === 0) return;
+    // 날짜 파싱: "2026. 5. 29." → Date
+    const toDate = (s: string) => {
+      const parts = s.replace(/\.\s*/g, "-").replace(/-$/, "").split("-").map(Number);
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    };
+    const dates = [...new Set(logs.map(l => l.date))].map(toDate).sort((a, b) => b.getTime() - a.getTime());
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    let count = 0;
+    let cursor = new Date(today);
+    for (const d of dates) {
+      d.setHours(0, 0, 0, 0);
+      if (d.getTime() === cursor.getTime()) { count++; cursor.setDate(cursor.getDate() - 1); }
+      else if (d.getTime() < cursor.getTime()) break;
+    }
+    setStreak(count);
+  }, []);
 
   function buildPersonalization() {
     const raw = localStorage.getItem("resetLog");
@@ -64,6 +91,35 @@ export default function Home() {
     };
 
     return { completionRates, recentActions: [...new Set(recentActions)] };
+  }
+
+  async function handleQuickSubmit() {
+    setLoading(true);
+    setFlightStatus("flying");
+    try {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
+      const quickText = `빠른 복구 요청. 에너지 ${energy}/10, 불안 ${anxiety}/10. 지금 당장 가능한 가장 작은 행동 3개를 주세요.`;
+      const personalization = buildPersonalization();
+      const res = await fetch(`${apiBase}/api/reset`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: quickText, energy, anxiety, timeLeft: "30분", personalization }),
+      });
+      const data = await res.json();
+      const ts = Date.now();
+      const logEntry = { ...data, date: new Date().toLocaleDateString("ko-KR"), input: quickText, energy, anxiety, completedCount: 0, completedActions: [], moodAfter: null, ts };
+      localStorage.setItem("resetResult", JSON.stringify(data));
+      const log = JSON.parse(localStorage.getItem("resetLog") || "[]");
+      log.unshift(logEntry);
+      localStorage.setItem("resetLog", JSON.stringify(log.slice(0, 30)));
+      saveLogToSupabase(logEntry);
+      setFlightStatus("arrived");
+    } catch {
+      alert("오류가 발생했어요. 다시 시도해주세요.");
+      setFlightStatus("ready");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleSubmit() {
@@ -100,6 +156,35 @@ export default function Home() {
     {showSplash && <SplashScreen onEnter={handleEnter} />}
     {loading && <LoadingScreen />}
     {flightStatus === "arrived" && <TakeoffAnimation onDone={() => router.push("/result")} />}
+    {showOnboarding && <Onboarding onDone={() => { localStorage.setItem("rp_onboarded", "1"); setShowOnboarding(false); }} />}
+
+    {/* 빠른 복구 모달 */}
+    {quickMode && (
+      <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(1,8,16,0.85)", backdropFilter: "blur(8px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ width: "100%", maxWidth: 400, background: "rgba(255,255,255,0.95)", borderRadius: 20, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
+          <div style={{ background: "linear-gradient(135deg, #0A2463, #163678)", padding: "18px 20px" }}>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", letterSpacing: 2, marginBottom: 4 }}>QUICK RECOVERY</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: "white" }}>⚡ 30초 복구</div>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", marginTop: 4 }}>지금 상태만 알려주면 바로 플랜 드릴게요.</div>
+          </div>
+          <div style={{ padding: "20px" }}>
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#4e6e82", marginBottom: 8 }}>⚡ 에너지 {energy}/10</div>
+              <input type="range" min={1} max={10} value={energy} onChange={e => setEnergy(Number(e.target.value))} style={{ width: "100%", accentColor: "#1DB4A8" }} />
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#4e6e82", marginBottom: 8 }}>😰 불안/스트레스 {anxiety}/10</div>
+              <input type="range" min={1} max={10} value={anxiety} onChange={e => setAnxiety(Number(e.target.value))} style={{ width: "100%", accentColor: "#E53935" }} />
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => setQuickMode(false)} style={{ flex: 1, padding: "12px", borderRadius: 10, border: "1.5px solid rgba(165,210,238,0.5)", background: "transparent", color: "#7facca", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>취소</button>
+              <button onClick={() => { setQuickMode(false); handleQuickSubmit(); }} style={{ flex: 2, padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg, #0A2463, #163678)", color: "white", fontSize: 14, fontWeight: 900, cursor: "pointer" }}>⚡ 바로 복구 시작</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
     <main style={{ maxWidth: 480, margin: "0 auto", padding: "12px 14px 40px", visibility: (!initialized || loading || flightStatus === "arrived") ? "hidden" : "visible" }}>
 
       {/* 헤더 */}
@@ -127,10 +212,22 @@ export default function Home() {
             오늘 망한 것 같아도<br />
             <span style={{ color: "#FFE066" }}>딱 하나만 다시 시작해봐요.</span>
           </h1>
+          {streak >= 2 && (
+            <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,160,0,0.18)", border: "1px solid rgba(255,160,0,0.35)", borderRadius: 20, padding: "4px 12px" }}>
+              <span style={{ fontSize: 14 }}>🔥</span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: "#FFB830" }}>{streak}일 연속 복구 중</span>
+            </div>
+          )}
         </div>
         <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+          <button onClick={() => setQuickMode(true)} style={{ background: "rgba(255,200,0,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,200,0,0.35)", color: "#FFE066", borderRadius: 10, padding: "8px 10px", fontSize: 16, cursor: "pointer", fontWeight: 900 }} title="30초 빠른 복구">
+            ⚡
+          </button>
           <button onClick={() => router.push("/history")} style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "8px 10px", fontSize: 18, cursor: "pointer" }}>
             📋
+          </button>
+          <button onClick={() => router.push("/notifications")} style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)", color: "white", borderRadius: 10, padding: "8px 10px", fontSize: 16, cursor: "pointer" }}>
+            🔔
           </button>
           {user ? (
             <button onClick={async () => { await supabase.auth.signOut(); setUser(null); }} style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.7)", borderRadius: 10, padding: "8px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
