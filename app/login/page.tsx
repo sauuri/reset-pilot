@@ -2,17 +2,50 @@
 
 import { supabase } from "../utils/supabase";
 
+async function isCapacitor(): Promise<boolean> {
+  if (typeof window === "undefined") return false;
+  try {
+    const { Capacitor } = await import("@capacitor/core");
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+}
+
 export default function LoginPage() {
   async function signInWithApple() {
-    const redirectTo =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/auth/callback`
-        : "https://reset-pilot.vercel.app/auth/callback";
+    const native = await isCapacitor();
 
-    await supabase.auth.signInWithOAuth({
-      provider: "apple",
-      options: { redirectTo },
-    });
+    if (native) {
+      // 네이티브 Apple 로그인
+      try {
+        const { SignInWithApple } = await import("@capacitor-community/apple-sign-in");
+        const result = await SignInWithApple.authorize({
+          clientId: "com.sauuri.resetpilot",
+          redirectURI: "https://reset-pilot.vercel.app/auth/callback",
+          scopes: "email name",
+          nonce: Math.random().toString(36).substring(2),
+        });
+
+        const { identityToken } = result.response;
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: "apple",
+          token: identityToken,
+        });
+
+        if (!error) window.location.href = "/";
+        else alert("로그인 실패: " + error.message);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : String(e);
+        if (!msg.includes("cancel")) alert("로그인 오류: " + msg);
+      }
+    } else {
+      // 웹 OAuth 리다이렉트
+      await supabase.auth.signInWithOAuth({
+        provider: "apple",
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+    }
   }
 
   return (
@@ -29,14 +62,7 @@ export default function LoginPage() {
     >
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: 48, marginBottom: 12 }}>✈️</div>
-        <h1
-          style={{
-            fontSize: 22,
-            fontWeight: 900,
-            color: "white",
-            marginBottom: 8,
-          }}
-        >
+        <h1 style={{ fontSize: 22, fontWeight: 900, color: "white", marginBottom: 8 }}>
           Reset Pilot
         </h1>
         <p style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", lineHeight: 1.6 }}>
