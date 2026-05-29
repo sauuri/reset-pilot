@@ -17,7 +17,10 @@ export default function Home() {
   useEffect(() => {
     if (!sessionStorage.getItem("rp_entered")) setShowSplash(true);
     setInitialized(true);
-    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (error) { setUser(null); return; }
+      setUser(data.user ?? null);
+    });
   }, []);
 
   function handleEnter() {
