@@ -28,20 +28,27 @@ export default function NotificationsPage() {
   useEffect(() => {
     const raw = localStorage.getItem("rp_notifications");
     if (raw) setSchedules(JSON.parse(raw));
+    const perm = localStorage.getItem("rp_notif_perm");
+    if (perm === "granted") setPermGranted(true);
+    else if (perm === "denied") setPermGranted(false);
   }, []);
 
   async function requestPermission() {
     try {
       const { LocalNotifications } = await import("@capacitor/local-notifications");
       const { display } = await LocalNotifications.requestPermissions();
-      setPermGranted(display === "granted");
+      const granted = display === "granted";
+      setPermGranted(granted);
+      localStorage.setItem("rp_notif_perm", granted ? "granted" : "denied");
     } catch {
-      // 웹 환경 — Notification API 사용
       if ("Notification" in window) {
         const result = await Notification.requestPermission();
-        setPermGranted(result === "granted");
+        const granted = result === "granted";
+        setPermGranted(granted);
+        localStorage.setItem("rp_notif_perm", granted ? "granted" : "denied");
       } else {
         setPermGranted(false);
+        localStorage.setItem("rp_notif_perm", "denied");
       }
     }
   }
