@@ -18,11 +18,19 @@ const GRADIENTS: Record<Mode, string> = {
   night:  "linear-gradient(180deg, #010810 0%, #030f1f 20%, #061828 50%, #0c2040 80%, #142e58 100%)",
 };
 
+// 그라데이션 최상단 색상 — 노치/오버스크롤 영역에 사용
+const SKY_TOP: Record<Mode, string> = {
+  dawn:   "#1a1a5e",
+  day:    "#3fa3d5",
+  sunset: "#0a1530",
+  night:  "#010810",
+};
+
 const SKY_NOTCH: Record<Mode, string> = {
-  dawn:   "#d89070",
-  day:    "#a8d8f0",
-  sunset: "#a04050",
-  night:  "#0e2040",
+  dawn:   "#1a1a5e",
+  day:    "#3fa3d5",
+  sunset: "#0a1530",
+  night:  "#010810",
 };
 
 function getSunPos(h: number) {
@@ -60,7 +68,11 @@ export default function SkyBackground() {
 
   useEffect(() => {
     if (hour === null) return;
-    document.documentElement.style.setProperty("--sky-notch", SKY_NOTCH[getMode(hour)]);
+    const m = getMode(hour);
+    document.documentElement.style.setProperty("--sky-notch", SKY_NOTCH[m]);
+    // 노치 + 오버스크롤 영역을 하늘 색으로
+    document.documentElement.style.background = SKY_TOP[m];
+    document.body.style.background = SKY_TOP[m];
   }, [hour]);
 
   if (hour === null) return null;

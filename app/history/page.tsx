@@ -34,6 +34,12 @@ export default function HistoryPage() {
     }
   }
 
+  function deleteEntry(i: number) {
+    const next = log.filter((_, idx) => idx !== i);
+    setLog(next);
+    localStorage.setItem("resetLog", JSON.stringify(next));
+  }
+
   return (
     <main style={{ maxWidth: 480, margin: "0 auto", padding: "32px 16px 80px" }}>
 
@@ -95,6 +101,18 @@ export default function HistoryPage() {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                     <span style={{ fontSize: 11, color: "#7facca", fontWeight: 600 }}>{entry.date}</span>
                     <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                      <button
+                        onClick={() => deleteEntry(i)}
+                        style={{
+                          background: "none", border: "none", cursor: "pointer",
+                          fontSize: 15, color: "rgba(165,210,238,0.5)",
+                          padding: "2px 4px", lineHeight: 1,
+                          transition: "color 0.15s",
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.color = "#E53935")}
+                        onMouseLeave={e => (e.currentTarget.style.color = "rgba(165,210,238,0.5)")}
+                        title="이 기록 삭제"
+                      >✕</button>
                       <span style={{ fontSize: 11, color: "#E53935", fontWeight: 700 }}>부담 {entry.ruinScore ?? "?"}%</span>
                       <span style={{ fontSize: 11, color: "#1DB4A8", fontWeight: 700 }}>회복 {entry.recoverScore ?? "?"}%</span>
                       {entry.completedCount !== undefined && (

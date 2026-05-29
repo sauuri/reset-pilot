@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%       { opacity: 0.9; transform: scale(1.3); }
+}
+@keyframes cloudDrift {
+  from { transform: translateX(-200px); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  to   { transform: translateX(110vw);  opacity: 0; }
+}
+
 :root {
   --bg: #b8e0f5;
   --surface: rgba(255,255,255,0.9);
@@ -24,8 +35,12 @@
 
 * { box-sizing: border-box; }
 
+html {
+  background: #010810; /* notch/overscroll fallback — SkyBackground JS overrides per time */
+}
+
 body {
-  background: #061828; /* SSR fallback — SkyBackground replaces this */
+  background: #010810; /* SSR fallback — SkyBackground replaces this */
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -116,24 +131,28 @@ main { position: relative; z-index: 3; }
 
 .ticket-header {
   background: linear-gradient(135deg, #0A2463 0%, #163678 100%);
-  padding: 16px 20px;
+  padding: 10px 14px;
 }
 
 .ticket-body {
-  background: #ffffff;
-  padding: 18px 20px;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 10px 14px;
 }
 
 .ticket-stub {
-  background: #f0f7fd;
-  padding: 14px 20px;
+  background: rgba(220,240,255,0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 8px 14px;
 }
 
 /* 점선 + 반원 구멍 분리선 */
 .ticket-tear {
   position: relative;
   height: 24px;
-  background-color: #ffffff;
+  background-color: rgba(255,255,255,0.82);
   /* 점선: 원 영역 피해서만 그림 */
   background-image: repeating-linear-gradient(
     to right,
@@ -147,7 +166,7 @@ main { position: relative; z-index: 3; }
 }
 /* stub 위에 오는 tear는 stub 색 배경 */
 .ticket-tear.tear-stub {
-  background-color: #f0f7fd;
+  background-color: rgba(220,240,255,0.65);
   background-image: repeating-linear-gradient(
     to right,
     rgba(10,36,99,0.1) 0px, rgba(10,36,99,0.1) 7px,
@@ -310,14 +329,14 @@ textarea {
   backdrop-filter: blur(4px);
   border: 1.5px solid rgba(170,210,238,0.65);
   color: var(--text);
-  border-radius: 12px;
-  padding: 14px;
+  border-radius: 10px;
+  padding: 10px 12px;
   width: 100%;
   resize: none;
-  font-size: 15px;
+  font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
-  line-height: 1.6;
+  line-height: 1.55;
 }
 textarea:focus {
   border-color: var(--navy);
@@ -386,9 +405,103 @@ textarea::placeholder { color: #7facca; }
   100% { transform: translateX(110vw) translateY(-30px); opacity: 0; }
 }
 
+@keyframes taxiRoll {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30%       { transform: translateY(-5px) rotate(-2deg); }
+  70%       { transform: translateY(-3px) rotate(1deg); }
+}
+@keyframes landingBounce {
+  0%   { transform: translateY(0)     scaleX(1)    scaleY(1); }
+  10%  { transform: translateY(-52px) scaleX(0.88) scaleY(1.12); }
+  22%  { transform: translateY(0)     scaleX(1.12) scaleY(0.88); }
+  34%  { transform: translateY(-26px) scaleX(0.94) scaleY(1.06); }
+  46%  { transform: translateY(0)     scaleX(1.06) scaleY(0.94); }
+  60%  { transform: translateY(-10px) scaleX(0.97) scaleY(1.03); }
+  73%  { transform: translateY(0)     scaleX(1.03) scaleY(0.97); }
+  86%  { transform: translateY(-4px)  scaleX(1)    scaleY(1); }
+  100% { transform: translateY(0)     scaleX(1)    scaleY(1); }
+}
+@keyframes armCelebLeft {
+  from { transform: rotate(-50deg); }
+  to   { transform: rotate(-70deg); }
+}
+@keyframes armCelebRight {
+  from { transform: rotate(50deg); }
+  to   { transform: rotate(70deg); }
+}
+@keyframes puffUp {
+  0%   { transform: translateY(0)    scale(1);   opacity: 0.7; }
+  100% { transform: translateY(-24px) scale(2.2); opacity: 0; }
+}
+@keyframes bounceIn {
+  0%   { transform: scale(0); }
+  70%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+@keyframes armWaveLeft {
+  0%, 100% { transform: rotate(0deg); }
+  50%       { transform: rotate(-28deg); }
+}
+@keyframes armWaveRight {
+  0%, 100% { transform: rotate(0deg); }
+  50%       { transform: rotate(28deg); }
+}
+@keyframes crewSlideUp {
+  from { transform: translateY(28px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes fadeToWhite {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes planeFly {
+  0%   { transform: translateX(-18px) translateY(4px)  rotate(-8deg); }
+  40%  { transform: translateX(10px)  translateY(-14px) rotate(4deg); }
+  70%  { transform: translateX(18px)  translateY(-6px) rotate(2deg); }
+  100% { transform: translateX(-18px) translateY(4px)  rotate(-8deg); }
+}
+@keyframes loadBar {
+  0%   { width: 0%;    margin-left: 0; }
+  50%  { width: 70%;   margin-left: 15%; }
+  100% { width: 0%;    margin-left: 100%; }
+}
+@keyframes fadeMsg {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes ticketFly {
+  0%   { transform: translateX(0)    translateY(0)      rotate(0deg)   scale(1);    opacity: 1; }
+  10%  { transform: translateX(-6px) translateY(8px)    rotate(-2deg)  scale(1.02); opacity: 1; }
+  30%  { transform: translateX(20px) translateY(-30px)  rotate(8deg)   scale(0.92); opacity: 1; }
+  60%  { transform: translateX(70px) translateY(-100px) rotate(18deg)  scale(0.6);  opacity: 0.85; }
+  100% { transform: translateX(150%) translateY(-200%)  rotate(25deg)  scale(0.15); opacity: 0; }
+}
+@keyframes planeTakeoff {
+  0%   { transform: translateX(0)    translateY(0)      rotate(0deg)  scale(1);    opacity: 0; }
+  8%   { opacity: 1; }
+  12%  { transform: translateX(-6px) translateY(8px)    rotate(-2deg) scale(1.08); }
+  35%  { transform: translateX(20px) translateY(-30px)  rotate(8deg)  scale(0.95); opacity: 1; }
+  100% { transform: translateX(150%) translateY(-200%)  rotate(25deg) scale(0.2);  opacity: 0; }
+}
+@keyframes flashWhite {
+  0%   { opacity: 0; }
+  30%  { opacity: 0.3; }
+  100% { opacity: 0; }
+}
+.ticket-flying {
+  animation: ticketFly 2s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  pointer-events: none;
+}
+.plane-takeoff {
+  animation: planeTakeoff 2s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  pointer-events: none;
+}
+.flash-white {
+  animation: flashWhite 2s ease forwards !important;
 }
 .animate-fadeInUp  { animation: fadeInUp 0.4s ease forwards; }
 .animate-delay-1   { animation-delay: 0.1s; opacity: 0; }

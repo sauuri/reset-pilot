@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import LandingAnimation from "../components/LandingAnimation";
 
 interface Action {
   name: string;
@@ -76,6 +77,7 @@ function ResultContent() {
   const [noData, setNoData] = useState(false);
   const [checked, setChecked] = useState<boolean[]>([false, false, false]);
   const [moodAfter, setMoodAfter] = useState<"better" | "same" | "worse" | null>(null);
+  const [showLanding, setShowLanding] = useState(false);
 
   useEffect(() => {
     if (isDemo) { setResult(SAMPLE); return; }
@@ -145,6 +147,8 @@ function ResultContent() {
   }
 
   return (
+    <>
+    {showLanding && <LandingAnimation completedCount={checkedCount} onDone={() => router.push("/")} />}
     <main style={{ maxWidth: 480, margin: "0 auto", padding: "24px 16px 80px" }}>
 
       {/* 헤더 */}
@@ -242,7 +246,7 @@ function ResultContent() {
                 border: "1.5px solid",
                 borderColor: checked[i] ? "#1DB4A8" : "rgba(165,210,238,0.5)",
                 cursor: "pointer",
-                transition: "all 0.2s",
+                transition: "background 0.2s, border-color 0.2s",
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
@@ -252,7 +256,7 @@ function ResultContent() {
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: 12, fontWeight: 900,
                       color: checked[i] ? "white" : "#7facca",
-                      transition: "all 0.2s",
+                      transition: "background 0.2s, color 0.2s",
                     }}>
                       {checked[i] ? "✓" : i + 1}
                     </div>
@@ -285,7 +289,7 @@ function ResultContent() {
               background: allDone ? "rgba(29,180,168,0.14)" : "rgba(29,180,168,0.07)",
               border: `1.5px solid ${allDone ? "#1DB4A8" : "rgba(29,180,168,0.3)"}`,
               borderRadius: 10, fontSize: 13, fontWeight: 700, color: "#1DB4A8",
-              transition: "all 0.3s",
+              transition: "background 0.3s, border-color 0.3s",
             }}>
               {checkedCount === 1 && "✓ 오늘은 0점은 아니에요."}
               {checkedCount === 2 && "✓✓ 흐름이 조금 돌아오고 있어요."}
@@ -399,25 +403,6 @@ function ResultContent() {
         </div>
       </div>
 
-      {/* 전문가 연결 — Crash Mode + 실사용 */}
-      {mode === "Crash Mode" && !isDemo && (
-        <div style={{ marginBottom: 14, padding: "16px 18px", background: "rgba(10,20,50,0.55)", backdropFilter: "blur(10px)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.12)" }}>
-          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, marginBottom: 12 }}>
-            <strong style={{ color: "white" }}>오늘 많이 힘드셨군요.</strong><br />
-            앱만으로 감당이 안 될 때는 전문가와 이야기하는 것도 방법이에요. 약해서가 아니에요.
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <a href="tel:1393" style={{ flex: 1, padding: "9px 6px", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 9, textAlign: "center", fontSize: 12, fontWeight: 700, color: "white", textDecoration: "none", display: "block" }}>
-              📞 자살예방 1393
-            </a>
-            <a href="tel:15770199" style={{ flex: 1, padding: "9px 6px", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 9, textAlign: "center", fontSize: 12, fontWeight: 700, color: "white", textDecoration: "none", display: "block" }}>
-              📞 정신건강 1577-0199
-            </a>
-          </div>
-          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 7, textAlign: "center" }}>24시간 · 무료 · 익명</div>
-        </div>
-      )}
-
       {isDemo && (
         <div style={{ marginBottom: 14, padding: "12px 16px", background: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.35)", textAlign: "center" }}>
           <div style={{ fontSize: 12, color: "white", fontWeight: 700, marginBottom: 6 }}>👀 샘플 리포트입니다</div>
@@ -427,13 +412,75 @@ function ResultContent() {
         </div>
       )}
 
-      <button className="btn-primary animate-fadeInUp animate-delay-3" onClick={() => router.push("/")}>
-        {allDone ? "🛬 오늘 착륙 완료! 내일도 ㄱ" : "✈️ 다시 입력하기"}
-      </button>
+      {checkedCount >= 1 ? (
+        <button
+          className="animate-fadeInUp animate-delay-3"
+          onClick={() => setShowLanding(true)}
+          style={{
+            width: "100%", border: "none", borderRadius: 16,
+            padding: "18px 28px", fontSize: 17, fontWeight: 900,
+            cursor: "pointer", letterSpacing: 0.5,
+            background: checkedCount === 3
+              ? "linear-gradient(135deg, #1DB4A8, #0a8a80)"
+              : checkedCount === 2
+              ? "linear-gradient(135deg, #1565C0, #0d47a1)"
+              : "linear-gradient(135deg, #FF8C00, #e06000)",
+            color: "white",
+            boxShadow: checkedCount === 3
+              ? "0 8px 28px rgba(29,180,168,0.45)"
+              : checkedCount === 2
+              ? "0 8px 28px rgba(21,101,192,0.45)"
+              : "0 8px 28px rgba(255,140,0,0.45)",
+            transition: "transform 0.15s, box-shadow 0.15s",
+          }}
+          onMouseDown={e => (e.currentTarget.style.transform = "translateY(2px)")}
+          onMouseUp={e => (e.currentTarget.style.transform = "translateY(0)")}
+        >
+          {checkedCount === 3
+            ? "🛬 착륙하기 — 오늘 수고했어!"
+            : checkedCount === 2
+            ? "🛬 착륙 — 오늘 꽤 잘 막았어"
+            : "🛬 비상착륙 — 일단 오늘 내려와"}
+        </button>
+      ) : (
+        <button className="btn-primary animate-fadeInUp animate-delay-3" onClick={() => router.push("/")}>
+          ✈️ 다시 입력하기
+        </button>
+      )}
       <button className="btn-ghost" style={{ marginTop: 10 }} onClick={() => router.push("/history")}>
         📋 기록 보기
       </button>
+
+      {result.mode === "Crash Mode" && !isDemo && (
+        <div style={{
+          marginTop: 14, padding: "16px 18px",
+          background: "rgba(10,20,50,0.55)", backdropFilter: "blur(12px)",
+          borderRadius: 14, border: "1px solid rgba(229,57,53,0.25)",
+        }}>
+          <div style={{ fontSize: 11, color: "#E53935", fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>
+            🆘 위기 상황이라면
+          </div>
+          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, marginBottom: 10 }}>
+            지금 너무 힘들고 혼자 감당이 안 된다면, 전화 한 통이 도움이 될 수 있어요.
+          </div>
+          <a href="tel:1393" style={{ display: "block", textDecoration: "none" }}>
+            <div style={{
+              padding: "10px 16px", borderRadius: 10,
+              background: "rgba(229,57,53,0.18)", border: "1px solid rgba(229,57,53,0.4)",
+              display: "flex", alignItems: "center", gap: 12,
+            }}>
+              <span style={{ fontSize: 22 }}>📞</span>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 900, color: "#ff6b6b" }}>자살예방상담전화 1393</div>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 1 }}>24시간 무료 · 익명 가능</div>
+              </div>
+            </div>
+          </a>
+        </div>
+      )}
     </main>
+    </>
+
   );
 }
 
