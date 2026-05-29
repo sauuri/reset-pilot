@@ -69,6 +69,20 @@ const SAMPLE: ResetResult = {
   message: "4시간 못 한 게 아니라, 지금 이걸 보고 있잖아. 그게 이미 시작이야 ✈️",
 };
 
+function parseDurationSecs(duration: string): number {
+  const h = duration.match(/(\d+)\s*시간/);
+  const m = duration.match(/(\d+)\s*분/);
+  return (h ? parseInt(h[1]) * 3600 : 0) + (m ? parseInt(m[1]) * 60 : 0) || 300;
+}
+
+function fmt(s: number) {
+  const m = Math.floor(s / 60).toString().padStart(2, "0");
+  const sec = (s % 60).toString().padStart(2, "0");
+  return `${m}:${sec}`;
+}
+
+interface TimerState { idx: number; total: number; remaining: number; done: boolean }
+
 function ResultContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -79,6 +93,34 @@ function ResultContent() {
   const [checked, setChecked] = useState<boolean[]>([false, false, false]);
   const [moodAfter, setMoodAfter] = useState<"better" | "same" | "worse" | null>(null);
   const [showLanding, setShowLanding] = useState(false);
+  const [timer, setTimer] = useState<TimerState | null>(null);
+  const timerRef = useEffect;
+
+  // 타이머 카운트다운
+  timerRef(() => {
+    if (!timer || timer.done) return;
+    if (timer.remaining <= 0) { setTimer(t => t ? { ...t, done: true } : null); return; }
+    const id = setInterval(() => {
+      setTimer(t => {
+        if (!t || t.done) { clearInterval(id); return t; }
+        const next = t.remaining - 1;
+        if (next <= 0) { clearInterval(id); return { ...t, remaining: 0, done: true }; }
+        return { ...t, remaining: next };
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [timer?.idx, timer?.done]);
+
+  function startTimer(i: number, duration: string) {
+    const secs = parseDurationSecs(duration);
+    setTimer({ idx: i, total: secs, remaining: secs, done: false });
+  }
+
+  function completeTimer() {
+    if (!timer) return;
+    const next = [...checked]; next[timer.idx] = true; setChecked(next);
+    setTimer(null);
+  }
 
   useEffect(() => {
     if (isDemo) { setResult(SAMPLE); return; }
@@ -153,6 +195,104 @@ function ResultContent() {
   return (
     <>
     {showLanding && <LandingAnimation completedCount={checkedCount} onDone={() => router.push("/")} />}
+
+    {/* 타이머 오버레이 */}
+    {timer && result && (
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 100,
+        background: "linear-gradient(180deg, #010d20 0%, #021430 50%, #041c3e 100%)",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        padding: "40px 24px",
+      }}>
+        {/* 별 배경 느낌 */}
+        <div style={{ position: "absolute", top: "8%", left: "50%", transform: "translateX(-50%)", fontSize: 28, opacity: 0.9, animation: timer.done ? "none" : "twinkle 1.2s ease-in-out infinite" }}>
+          {timer.done ? "🛬" : "✈️"}
+        </div>
+
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 2, marginBottom: 8 }}>
+            {timer.done ? "MISSION COMPLETE" : "NOW FLYING"}
+          </div>
+          <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", fontWeight: 700, marginBottom: 4 }}>
+            {result.actions[timer.idx].name}
+          </div>
+          <div style={{ fontSize: 18, color: "white", fontWeight: 900, lineHeight: 1.4 }}>
+            {result.actions[timer.idx].title}
+          </div>
+        </div>
+
+        {/* 원형 타이머 */}
+        <div style={{ position: "relative", width: 200, height: 200, marginBottom: 36 }}>
+          <svg width="200" height="200" style={{ transform: "rotate(-90deg)" }}>
+            <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="10" />
+            <circle cx="100" cy="100" r="88" fill="none"
+              stroke={timer.done ? "#1DB4A8" : "#5b9bd5"}
+              strokeWidth="10" strokeLinecap="round"
+              strokeDasharray={`${2 * Math.PI * 88}`}
+              strokeDashoffset={`${2 * Math.PI * 88 * (timer.remaining / timer.total)}`}
+              style={{ transition: "stroke-dashoffset 0.9s linear, stroke 0.3s" }}
+            />
+          </svg>
+          <div style={{
+            position: "absolute", inset: 0,
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          }}>
+            {timer.done ? (
+              <div style={{ fontSize: 44 }}>🎉</div>
+            ) : (
+              <>
+                <div style={{ fontSize: 46, fontWeight: 900, color: "white", letterSpacing: -1, fontVariantNumeric: "tabular-nums" }}>
+                  {fmt(timer.remaining)}
+                </div>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>남음</div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {timer.done ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 300 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#1DB4A8", textAlign: "center", marginBottom: 4 }}>
+              시간 다 됐어요! 어떻게 됐나요?
+            </div>
+            <button onClick={completeTimer} style={{
+              padding: "14px", borderRadius: 14, border: "none", cursor: "pointer",
+              background: "linear-gradient(135deg, #1DB4A8, #0a8a80)",
+              color: "white", fontSize: 15, fontWeight: 900,
+              boxShadow: "0 6px 20px rgba(29,180,168,0.4)",
+            }}>
+              ✅ 완료했어요!
+            </button>
+            <button onClick={() => setTimer(null)} style={{
+              padding: "14px", borderRadius: 14, cursor: "pointer",
+              background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)",
+              color: "rgba(255,255,255,0.7)", fontSize: 14, fontWeight: 700,
+            }}>
+              😅 못 했지만 괜찮아요
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 300 }}>
+            <button onClick={completeTimer} style={{
+              padding: "14px", borderRadius: 14, border: "none", cursor: "pointer",
+              background: "linear-gradient(135deg, #1DB4A8, #0a8a80)",
+              color: "white", fontSize: 15, fontWeight: 900,
+              boxShadow: "0 6px 20px rgba(29,180,168,0.4)",
+            }}>
+              ✅ 벌써 완료했어요!
+            </button>
+            <button onClick={() => setTimer(null)} style={{
+              padding: "14px", borderRadius: 14, cursor: "pointer",
+              background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)",
+              color: "rgba(255,255,255,0.6)", fontSize: 13, fontWeight: 700,
+            }}>
+              ✕ 나중에 할게요
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+
     <main style={{ maxWidth: 480, margin: "0 auto", padding: "24px 16px 80px" }}>
 
       {/* 헤더 */}
@@ -275,9 +415,22 @@ function ResultContent() {
                       </div>
                     </div>
                   </div>
-                  <span style={{ fontSize: 10, color: "#FF6B35", background: "rgba(255,245,240,0.8)", border: "1px solid rgba(255,203,164,0.5)", padding: "2px 8px", borderRadius: 20, flexShrink: 0, marginLeft: 8 }}>
-                    {action.duration}
-                  </span>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0, marginLeft: 8 }}>
+                    <span style={{ fontSize: 10, color: "#FF6B35", background: "rgba(255,245,240,0.8)", border: "1px solid rgba(255,203,164,0.5)", padding: "2px 8px", borderRadius: 20 }}>
+                      {action.duration}
+                    </span>
+                    {!checked[i] && (
+                      <button
+                        onClick={e => { e.stopPropagation(); startTimer(i, action.duration); }}
+                        style={{
+                          fontSize: 10, fontWeight: 700, color: "#0A2463",
+                          background: "rgba(255,255,255,0.85)", border: "1px solid rgba(165,210,238,0.6)",
+                          borderRadius: 20, padding: "2px 8px", cursor: "pointer",
+                          whiteSpace: "nowrap",
+                        }}
+                      >⏱ 타이머</button>
+                    )}
+                  </div>
                 </div>
                 <div style={{ fontSize: 11, color: "#7facca", marginTop: 5, marginLeft: 36 }}>
                   {action.reason}
