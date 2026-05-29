@@ -196,7 +196,7 @@ function ResultContent() {
     const completedCount = checked.filter(Boolean).length;
     log[0] = { ...log[0], completedCount, completedActions };
     localStorage.setItem("resetLog", JSON.stringify(log));
-    if (log[0].ts) updateLogInSupabase(log[0].ts, { completedActions, completedCount });
+    if (log[0].ts) updateLogInSupabase(log[0].ts, { completedActions, completedCount }, log[0]._id);
   }, [checked, isDemo, result]);
 
   useEffect(() => {
@@ -207,7 +207,7 @@ function ResultContent() {
     if (log.length === 0) return;
     log[0] = { ...log[0], moodAfter };
     localStorage.setItem("resetLog", JSON.stringify(log));
-    if (log[0].ts) updateLogInSupabase(log[0].ts, { moodAfter });
+    if (log[0].ts) updateLogInSupabase(log[0].ts, { moodAfter }, log[0]._id);
   }, [moodAfter, isDemo]);
 
   /* 데이터 없음 — 빈 상태 */

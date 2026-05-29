@@ -5,11 +5,11 @@ export async function getUser() {
   return data.user;
 }
 
-export async function saveLogToSupabase(log: Record<string, unknown>) {
+export async function saveLogToSupabase(log: Record<string, unknown>): Promise<string | null> {
   const user = await getUser();
-  if (!user) return;
+  if (!user) return null;
 
-  await supabase.from("recovery_logs").insert({
+  const { data } = await supabase.from("recovery_logs").insert({
     user_id: user.id,
     situation_text: log.input,
     energy: log.energy,
@@ -23,26 +23,35 @@ export async function saveLogToSupabase(log: Record<string, unknown>) {
     completed_actions_json: log.completedActions ?? [],
     mood_after: log.moodAfter ?? null,
     created_at: new Date(log.ts as number).toISOString(),
-  });
+  }).select("id").single();
+
+  return data?.id ?? null;
 }
 
 export async function updateLogInSupabase(
   ts: number,
-  update: { completedActions?: string[]; completedCount?: number; moodAfter?: "better" | "same" | "worse" | null }
+  update: { completedActions?: string[]; completedCount?: number; moodAfter?: "better" | "same" | "worse" | null },
+  id?: string
 ) {
   const user = await getUser();
   if (!user) return;
 
-  const created_at = new Date(ts).toISOString();
   const patch: Record<string, unknown> = {};
   if (update.completedActions !== undefined) patch.completed_actions_json = update.completedActions;
   if (update.moodAfter !== undefined) patch.mood_after = update.moodAfter;
+  if (Object.keys(patch).length === 0) return;
 
-  await supabase
-    .from("recovery_logs")
-    .update(patch)
-    .eq("user_id", user.id)
-    .eq("created_at", created_at);
+  if (id) {
+    await supabase.from("recovery_logs").update(patch).eq("id", id).eq("user_id", user.id);
+  } else {
+    // Supabase may truncate ms precision — use 2s window
+    await supabase
+      .from("recovery_logs")
+      .update(patch)
+      .eq("user_id", user.id)
+      .gte("created_at", new Date(ts - 2000).toISOString())
+      .lte("created_at", new Date(ts + 2000).toISOString());
+  }
 }
 
 export async function deleteLogsFromSupabase(ids: string[]) {

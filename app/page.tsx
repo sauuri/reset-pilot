@@ -112,7 +112,14 @@ export default function Home() {
       const log = JSON.parse(localStorage.getItem("resetLog") || "[]");
       log.unshift(logEntry);
       localStorage.setItem("resetLog", JSON.stringify(log.slice(0, 30)));
-      saveLogToSupabase(logEntry);
+      saveLogToSupabase(logEntry).then(id => {
+        if (!id) return;
+        const stored = JSON.parse(localStorage.getItem("resetLog") || "[]");
+        if (stored.length > 0 && stored[0].ts === logEntry.ts) {
+          stored[0]._id = id;
+          localStorage.setItem("resetLog", JSON.stringify(stored));
+        }
+      });
       setFlightStatus("arrived");
     } catch {
       alert("오류가 발생했어요. 다시 시도해주세요.");
@@ -141,7 +148,14 @@ export default function Home() {
       const log = JSON.parse(localStorage.getItem("resetLog") || "[]");
       log.unshift(logEntry);
       localStorage.setItem("resetLog", JSON.stringify(log.slice(0, 30)));
-      saveLogToSupabase(logEntry);
+      saveLogToSupabase(logEntry).then(id => {
+        if (!id) return;
+        const stored = JSON.parse(localStorage.getItem("resetLog") || "[]");
+        if (stored.length > 0 && stored[0].ts === logEntry.ts) {
+          stored[0]._id = id;
+          localStorage.setItem("resetLog", JSON.stringify(stored));
+        }
+      });
       setFlightStatus("arrived");
     } catch {
       alert("오류가 발생했어요. 다시 시도해주세요.");
