@@ -100,6 +100,8 @@ export default function HistoryPage() {
   const router = useRouter();
   const [log, setLog] = useState<LogEntry[]>([]);
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     loadLogsFromSupabase().then((remote) => {
@@ -125,6 +127,29 @@ export default function HistoryPage() {
     localStorage.setItem("resetLog", JSON.stringify(next));
   }
 
+  function toggleSelect(i: number) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  }
+
+  function deleteSelected() {
+    if (selected.size === 0) return;
+    if (!confirm(`선택한 ${selected.size}개를 삭제할까요?`)) return;
+    const next = log.filter((_, i) => !selected.has(i));
+    setLog(next);
+    localStorage.setItem("resetLog", JSON.stringify(next));
+    setSelected(new Set());
+    setSelectMode(false);
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false);
+    setSelected(new Set());
+  }
+
   return (
     <main style={{ maxWidth: 480, margin: "0 auto", padding: "32px 16px 80px" }}>
 
@@ -136,12 +161,28 @@ export default function HistoryPage() {
             📋 복구 기록
           </h1>
         </div>
-        <button
-          onClick={() => router.push("/")}
-          style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
-        >
-          ← 홈
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          {log.length > 0 && (
+            <button
+              onClick={() => selectMode ? exitSelectMode() : setSelectMode(true)}
+              style={{
+                background: selectMode ? "rgba(229,57,53,0.15)" : "rgba(255,255,255,0.15)",
+                backdropFilter: "blur(8px)",
+                border: `1px solid ${selectMode ? "rgba(229,57,53,0.4)" : "rgba(255,255,255,0.25)"}`,
+                color: selectMode ? "#ff6b6b" : "rgba(255,255,255,0.8)",
+                borderRadius: 10, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+              }}
+            >
+              {selectMode ? "취소" : "선택"}
+            </button>
+          )}
+          <button
+            onClick={() => router.push("/")}
+            style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+          >
+            ← 홈
+          </button>
+        </div>
       </div>
 
       {log.length >= 3 && (
@@ -194,13 +235,31 @@ export default function HistoryPage() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {log.map((entry, i) => (
-              <div key={i} className="ticket">
+              <div
+                key={i}
+                className="ticket"
+                onClick={() => selectMode && toggleSelect(i)}
+                style={{ cursor: selectMode ? "pointer" : "default", outline: selectMode && selected.has(i) ? "2px solid #E53935" : "none", borderRadius: 14 }}
+              >
                 <div className="ticket-body" style={{ padding: "14px 18px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <span style={{ fontSize: 11, color: "#7facca", fontWeight: 600 }}>{entry.date}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      {selectMode && (
+                        <div style={{
+                          width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+                          border: `2px solid ${selected.has(i) ? "#E53935" : "rgba(165,210,238,0.5)"}`,
+                          background: selected.has(i) ? "#E53935" : "transparent",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 11, color: "white", fontWeight: 900,
+                        }}>
+                          {selected.has(i) ? "✓" : ""}
+                        </div>
+                      )}
+                      <span style={{ fontSize: 11, color: "#7facca", fontWeight: 600 }}>{entry.date}</span>
+                    </div>
                     <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                      <button
-                        onClick={() => deleteEntry(i)}
+                      {!selectMode && <button
+                        onClick={e => { e.stopPropagation(); deleteEntry(i); }}
                         style={{
                           background: "none", border: "none", cursor: "pointer",
                           fontSize: 15, color: "rgba(165,210,238,0.5)",
@@ -210,7 +269,7 @@ export default function HistoryPage() {
                         onMouseEnter={e => (e.currentTarget.style.color = "#E53935")}
                         onMouseLeave={e => (e.currentTarget.style.color = "rgba(165,210,238,0.5)")}
                         title="이 기록 삭제"
-                      >✕</button>
+                      >✕</button>}
                       <span style={{ fontSize: 11, color: "#E53935", fontWeight: 700 }}>부담 {entry.ruinScore ?? "?"}%</span>
                       <span style={{ fontSize: 11, color: "#1DB4A8", fontWeight: 700 }}>회복 {entry.recoverScore ?? "?"}%</span>
                       {entry.completedCount !== undefined && (
@@ -246,13 +305,28 @@ export default function HistoryPage() {
             ))}
           </div>
 
-          <button
-            onClick={clearLog}
-            className="btn-ghost"
-            style={{ marginTop: 24 }}
-          >
-            기록 전체 삭제
-          </button>
+          {selectMode ? (
+            <div style={{ marginTop: 24, display: "flex", gap: 8 }}>
+              <button onClick={exitSelectMode} className="btn-ghost" style={{ flex: 1 }}>
+                취소
+              </button>
+              <button
+                onClick={deleteSelected}
+                disabled={selected.size === 0}
+                style={{
+                  flex: 1, padding: "12px", borderRadius: 12, border: "none", cursor: selected.size > 0 ? "pointer" : "default",
+                  background: selected.size > 0 ? "#E53935" : "rgba(229,57,53,0.3)",
+                  color: "white", fontSize: 14, fontWeight: 800,
+                }}
+              >
+                {selected.size > 0 ? `🗑 ${selected.size}개 삭제` : "항목을 선택하세요"}
+              </button>
+            </div>
+          ) : (
+            <button onClick={clearLog} className="btn-ghost" style={{ marginTop: 24 }}>
+              기록 전체 삭제
+            </button>
+          )}
         </>
       )}
     </main>
