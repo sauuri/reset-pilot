@@ -208,10 +208,16 @@ export default function Home() {
               {flightStatus === "arrived" && "도착 ✓"}
             </span>
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 900, lineHeight: 1.35, color: "white", margin: 0, textShadow: "0 2px 10px rgba(10,36,99,0.25)" }}>
+          <h1 style={{ fontSize: 20, fontWeight: 900, lineHeight: 1.35, color: "white", margin: 0, textShadow: "0 2px 10px rgba(10,36,99,0.25)" }}>
             오늘 망한 것 같아도<br />
-            <span style={{ color: "#FFE066" }}>딱 하나만 다시 시작해봐요.</span>
+            <span style={{ color: "#FFE066", whiteSpace: "nowrap" }}>딱 하나만 다시 시작해봐요.</span>
           </h1>
+          {streak >= 2 && (
+            <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,160,0,0.18)", border: "1px solid rgba(255,160,0,0.35)", borderRadius: 20, padding: "3px 10px", whiteSpace: "nowrap" }}>
+              <span style={{ fontSize: 13, lineHeight: 1 }}>🔥</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: "#FFB830" }}>{streak}일 연속 복구 중</span>
+            </div>
+          )}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 5, flexShrink: 0 }}>
           {/* 1행: 로그인/아웃 */}
@@ -230,13 +236,6 @@ export default function Home() {
             <button onClick={() => router.push("/history")} style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)", color: "white", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", lineHeight: 1 }}>📋</button>
             <button onClick={() => router.push("/notifications")} style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", color: "white", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", lineHeight: 1 }}>🔔</button>
           </div>
-          {/* 3행: 연속 스트릭 */}
-          {streak >= 2 && (
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,160,0,0.18)", border: "1px solid rgba(255,160,0,0.35)", borderRadius: 20, padding: "4px 10px", whiteSpace: "nowrap", justifyContent: "center" }}>
-              <span style={{ fontSize: 13, lineHeight: 1 }}>🔥</span>
-              <span style={{ fontSize: 11, fontWeight: 800, color: "#FFB830" }}>{streak}일 연속</span>
-            </div>
-          )}
         </div>
       </div>
 
