@@ -67,7 +67,7 @@ export default function Home() {
     {showSplash && <SplashScreen onEnter={handleEnter} />}
     {loading && <LoadingScreen />}
     {flightStatus === "arrived" && <TakeoffAnimation onDone={() => router.push("/result")} />}
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: "12px 14px 40px", visibility: (!initialized || loading || flightStatus === "arrived") ? "hidden" : "visible" }}>
+    <main style={{ maxWidth: 480, margin: "0 auto", padding: "calc(12px + env(safe-area-inset-top, 0px)) 14px 40px", visibility: (!initialized || loading || flightStatus === "arrived") ? "hidden" : "visible" }}>
 
       {/* 헤더 */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 10 }}>
