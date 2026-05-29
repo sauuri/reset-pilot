@@ -2,40 +2,12 @@
 
 import { supabase } from "../utils/supabase";
 
-async function isCapacitor(): Promise<boolean> {
-  if (typeof window === "undefined") return false;
-  try {
-    const { Capacitor } = await import("@capacitor/core");
-    return Capacitor.isNativePlatform();
-  } catch {
-    return false;
-  }
-}
-
 export default function LoginPage() {
   async function signInWithApple() {
-    const native = await isCapacitor();
-    const redirectTo = `${window.location.origin}/auth/callback`;
-
-    if (native) {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "apple",
-        options: { redirectTo, skipBrowserRedirect: true },
-      });
-
-      if (error || !data.url) {
-        alert("로그인 오류: " + error?.message);
-        return;
-      }
-
-      const { Browser } = await import("@capacitor/browser");
-      await Browser.open({ url: data.url, windowName: "_self" });
-    } else {
-      await supabase.auth.signInWithOAuth({
-        provider: "apple",
-        options: { redirectTo },
-      });
-    }
+    await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
   }
 
   return (
