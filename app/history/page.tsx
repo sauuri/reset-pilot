@@ -50,7 +50,6 @@ function CalendarView({ log }: { log: LogEntry[] }) {
   const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   const moodColor: Record<string, string> = { better: "#1DB4A8", same: "#F59E0B", worse: "#E53935", none: "#5b9bd5" };
   const moodEmoji: Record<string, string> = { better: "😊", same: "😐", worse: "😔", none: "✓" };
-  const birthdayKey = `${year}-06-30`;
 
   return (
     <div className="ticket" style={{ marginBottom: 16 }}>
@@ -71,22 +70,21 @@ function CalendarView({ log }: { log: LogEntry[] }) {
             const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const mood = dateMap[key];
             const isToday = key === todayKey;
-            const isBirthday = key === birthdayKey && !mood;
             return (
               <div key={i} style={{ textAlign: "center", padding: "2px 0" }}>
                 <div style={{
                   width: 32, height: 32, margin: "0 auto", borderRadius: "50%",
                   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                  background: mood ? moodColor[mood] : isToday ? "rgba(165,210,238,0.2)" : isBirthday ? "rgba(255,100,150,0.2)" : "transparent",
-                  border: isToday && !mood ? "1.5px solid rgba(165,210,238,0.5)" : isBirthday ? "1.5px solid rgba(255,100,150,0.6)" : "none",
-                  fontSize: mood && mood !== "none" ? 16 : isBirthday ? 16 : 11,
+                  background: mood ? moodColor[mood] : isToday ? "rgba(165,210,238,0.2)" : "transparent",
+                  border: isToday && !mood ? "1.5px solid rgba(165,210,238,0.5)" : "none",
+                  fontSize: mood && mood !== "none" ? 16 : 11,
                   color: mood ? "white" : isToday ? "#7facca" : "#9ab8cc",
                   fontWeight: isToday && !mood ? 800 : 400,
                   lineHeight: 1,
                 }}>
                   {mood && mood !== "none" ? moodEmoji[mood] : mood === "none" ? (
                     <span style={{ fontSize: 11, color: "white", fontWeight: 700 }}>✓</span>
-                  ) : isBirthday ? "🎂" : day}
+                  ) : day}
                 </div>
               </div>
             );
