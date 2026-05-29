@@ -70,17 +70,20 @@ function CalendarView({ log }: { log: LogEntry[] }) {
             const mood = dateMap[key];
             const isToday = key === todayKey;
             return (
-              <div key={i} style={{ textAlign: "center", padding: "3px 0" }}>
+              <div key={i} style={{ textAlign: "center", padding: "2px 0" }}>
                 <div style={{
-                  width: 28, height: 28, margin: "0 auto", borderRadius: "50%",
+                  width: 32, height: 32, margin: "0 auto", borderRadius: "50%",
                   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                   background: mood ? moodColor[mood] : isToday ? "rgba(165,210,238,0.2)" : "transparent",
                   border: isToday && !mood ? "1.5px solid rgba(165,210,238,0.5)" : "none",
-                  fontSize: mood ? 11 : 11,
+                  fontSize: mood && mood !== "none" ? 16 : 11,
                   color: mood ? "white" : isToday ? "#7facca" : "#9ab8cc",
-                  fontWeight: isToday ? 800 : 400,
+                  fontWeight: isToday && !mood ? 800 : 400,
+                  lineHeight: 1,
                 }}>
-                  {mood ? moodEmoji[mood] : day}
+                  {mood && mood !== "none" ? moodEmoji[mood] : mood === "none" ? (
+                    <span style={{ fontSize: 11, color: "white", fontWeight: 700 }}>✓</span>
+                  ) : day}
                 </div>
               </div>
             );
