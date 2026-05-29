@@ -5,16 +5,19 @@ import { useRouter } from "next/navigation";
 import SplashScreen from "./components/SplashScreen";
 import LoadingScreen from "./components/LoadingScreen";
 import TakeoffAnimation from "./components/TakeoffAnimation";
+import { supabase } from "./utils/supabase";
 
 export default function Home() {
   const router = useRouter();
   const [showSplash, setShowSplash] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [text, setText] = useState("");
+  const [user, setUser] = useState<{ id: string; email?: string } | null | undefined>(undefined);
 
   useEffect(() => {
     if (!sessionStorage.getItem("rp_entered")) setShowSplash(true);
     setInitialized(true);
+    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
   }, []);
 
   function handleEnter() {
@@ -85,9 +88,20 @@ export default function Home() {
             <span style={{ color: "#FFE066" }}>딱 하나만 다시 시작해봐요.</span>
           </h1>
         </div>
-        <button onClick={() => router.push("/history")} style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "8px 10px", fontSize: 18, cursor: "pointer", flexShrink: 0 }}>
-          📋
-        </button>
+        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+          <button onClick={() => router.push("/history")} style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "8px 10px", fontSize: 18, cursor: "pointer" }}>
+            📋
+          </button>
+          {user ? (
+            <button onClick={async () => { await supabase.auth.signOut(); setUser(null); }} style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.7)", borderRadius: 10, padding: "8px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+              로그아웃
+            </button>
+          ) : user === null ? (
+            <button onClick={() => router.push("/login")} style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "8px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+              로그인
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {/* 탑승권 카드 */}
