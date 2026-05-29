@@ -15,35 +15,25 @@ async function isCapacitor(): Promise<boolean> {
 export default function LoginPage() {
   async function signInWithApple() {
     const native = await isCapacitor();
+    const redirectTo = `${window.location.origin}/auth/callback`;
 
     if (native) {
-      // 네이티브 Apple 로그인
-      try {
-        const { SignInWithApple } = await import("@capacitor-community/apple-sign-in");
-        const result = await SignInWithApple.authorize({
-          clientId: "com.sauuri.resetpilot",
-          redirectURI: "https://reset-pilot.vercel.app/auth/callback",
-          scopes: "email name",
-          nonce: Math.random().toString(36).substring(2),
-        });
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "apple",
+        options: { redirectTo, skipBrowserRedirect: true },
+      });
 
-        const { identityToken } = result.response;
-        const { error } = await supabase.auth.signInWithIdToken({
-          provider: "apple",
-          token: identityToken,
-        });
-
-        if (!error) window.location.href = "/";
-        else alert("로그인 실패: " + error.message);
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : String(e);
-        if (!msg.includes("cancel")) alert("로그인 오류: " + msg);
+      if (error || !data.url) {
+        alert("로그인 오류: " + error?.message);
+        return;
       }
+
+      const { Browser } = await import("@capacitor/browser");
+      await Browser.open({ url: data.url, windowName: "_self" });
     } else {
-      // 웹 OAuth 리다이렉트
       await supabase.auth.signInWithOAuth({
         provider: "apple",
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
+        options: { redirectTo },
       });
     }
   }
