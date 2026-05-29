@@ -9,6 +9,9 @@ const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "ResetPilot — 망한 하루 복구 AI",
   description: "오늘 망했어도 괜찮아. 지금 당장 가능한 것부터.",
+  other: {
+    "viewport": "width=device-width, initial-scale=1, viewport-fit=cover",
+  },
 };
 
 // inline script: runs synchronously before React hydration to prevent white flash
