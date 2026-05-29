@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LandingAnimation from "../components/LandingAnimation";
 import { updateLogInSupabase } from "../utils/logs";
+import { getCurrentBadge, getNextBadge } from "../utils/badges";
 
 interface Action {
   name: string;
@@ -96,11 +97,20 @@ function ResultContent() {
   const [timer, setTimer] = useState<TimerState | null>(null);
   const timerRef = useEffect;
   const [saved, setSaved] = useState(false);
+  const [journal, setJournal] = useState("");
+  const [journalSaved, setJournalSaved] = useState(false);
+  const [newBadge, setNewBadge] = useState<{ emoji: string; name: string; desc: string } | null>(null);
 
   useEffect(() => {
     if (!result || isDemo) return;
     const plans: ResetResult[] = JSON.parse(localStorage.getItem("savedPlans") || "[]");
     setSaved(plans.some(p => p.recoveryGoal === result.recoveryGoal && p.mode === result.mode));
+    // 뱃지 해금 체크
+    const log = JSON.parse(localStorage.getItem("resetLog") || "[]");
+    const total = log.length;
+    const cur = getCurrentBadge(total);
+    const prev = getCurrentBadge(total - 1);
+    if (cur && cur.count !== prev?.count) setNewBadge(cur);
   }, [result, isDemo]);
 
   function toggleSave() {
@@ -141,6 +151,17 @@ function ResultContent() {
     if (!timer) return;
     const next = [...checked]; next[timer.idx] = true; setChecked(next);
     setTimer(null);
+  }
+
+  function saveJournal() {
+    if (!journal.trim() || isDemo) return;
+    const raw = localStorage.getItem("resetLog");
+    if (!raw) return;
+    const log = JSON.parse(raw);
+    if (log.length === 0) return;
+    log[0] = { ...log[0], journal };
+    localStorage.setItem("resetLog", JSON.stringify(log));
+    setJournalSaved(true);
   }
 
   async function shareResult() {
@@ -231,6 +252,22 @@ function ResultContent() {
   return (
     <>
     {showLanding && <LandingAnimation completedCount={checkedCount} onDone={() => router.push("/")} />}
+
+    {/* 뱃지 해금 오버레이 */}
+    {newBadge && (
+      <div style={{ position: "fixed", inset: 0, zIndex: 150, background: "rgba(1,8,16,0.88)", backdropFilter: "blur(10px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32 }}
+        onClick={() => setNewBadge(null)}>
+        <div style={{ textAlign: "center", animation: "fadeInUp 0.5s ease" }}>
+          <div style={{ fontSize: 72, marginBottom: 16, lineHeight: 1 }}>{newBadge.emoji}</div>
+          <div style={{ fontSize: 11, letterSpacing: 3, color: "#1DB4A8", fontWeight: 700, marginBottom: 10 }}>NEW BADGE UNLOCKED</div>
+          <div style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 10 }}>{newBadge.name}</div>
+          <div style={{ fontSize: 14, color: "rgba(255,255,255,0.65)", lineHeight: 1.7, maxWidth: 280, margin: "0 auto", whiteSpace: "pre-line", marginBottom: 32 }}>{newBadge.desc}</div>
+          <button onClick={() => setNewBadge(null)} style={{ padding: "14px 32px", borderRadius: 14, border: "none", background: "linear-gradient(135deg, #1DB4A8, #0a8a80)", color: "white", fontSize: 15, fontWeight: 900, cursor: "pointer" }}>
+            ✈️ 확인
+          </button>
+        </div>
+      </div>
+    )}
 
     {/* 타이머 오버레이 */}
     {timer && result && (
@@ -556,6 +593,30 @@ function ResultContent() {
                 {moodAfter === "same"   && "✓ 기록됐어요. 그래도 오늘 버텼어요."}
                 {moodAfter === "worse"  && "✓ 기록됐어요. 솔직하게 알려줘서 고마워요."}
               </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 오늘의 한 줄 일기 */}
+      {!isDemo && (
+        <div className="ticket animate-fadeInUp" style={{ marginBottom: 14 }}>
+          <div className="ticket-body" style={{ padding: "16px 20px" }}>
+            <div className="ticket-label" style={{ marginBottom: 8 }}>✏️ 오늘 잘 한 것 하나 (선택)</div>
+            <textarea
+              rows={2}
+              placeholder="아주 작은 것도 괜찮아요. '물 한 잔 마셨다'도 충분해요."
+              value={journal}
+              onChange={e => setJournal(e.target.value)}
+              style={{ width: "100%", resize: "none", fontSize: 13 }}
+            />
+            {journal.trim() && (
+              <button
+                onClick={saveJournal}
+                style={{ marginTop: 8, width: "100%", padding: "10px", borderRadius: 10, border: "none", cursor: "pointer", background: journalSaved ? "rgba(29,180,168,0.15)" : "rgba(10,36,99,0.08)", color: journalSaved ? "#1DB4A8" : "#4e6e82", fontSize: 13, fontWeight: 700, transition: "all 0.2s" }}
+              >
+                {journalSaved ? "✓ 저장됐어요!" : "저장하기"}
+              </button>
             )}
           </div>
         </div>

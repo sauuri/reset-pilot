@@ -497,6 +497,37 @@ export default function InsightsPage() {
         </div>
       )}
 
+      {/* 🔄 나의 기본 복구 루틴 */}
+      {topActions.length >= 3 && (
+        <div className="ticket animate-fadeInUp" style={{ marginBottom: 14 }}>
+          <div className="ticket-header" style={{ padding: "12px 20px" }}>
+            <div className="ticket-label" style={{ color: "rgba(255,255,255,0.5)" }}>🔄 나의 기본 복구 루틴</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", marginTop: 3 }}>완료율이 가장 높았던 행동 3가지예요</div>
+          </div>
+          <div className="ticket-body">
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+              {topActions.slice(0, 3).map(([title, count], i) => (
+                <div key={title} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "rgba(29,180,168,0.07)", borderRadius: 10, border: "1px solid rgba(29,180,168,0.2)" }}>
+                  <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#1DB4A8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 900, color: "white", flexShrink: 0 }}>{i + 1}</div>
+                  <div style={{ flex: 1, fontSize: 13, fontWeight: 700, color: "#1A1F36" }}>{title}</div>
+                  <div style={{ fontSize: 10, color: "#1DB4A8", fontWeight: 700 }}>{count}회 완료</div>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                const routine = topActions.slice(0, 3).map(([t]) => t).join(" → ");
+                localStorage.setItem("rp_my_routine", routine);
+                alert("루틴이 저장됐어요! 다음 복구에 활용할게요.");
+              }}
+              style={{ width: "100%", padding: "11px", borderRadius: 10, border: "1.5px solid rgba(29,180,168,0.4)", background: "rgba(29,180,168,0.08)", color: "#1DB4A8", fontSize: 13, fontWeight: 800, cursor: "pointer" }}
+            >
+              ⭐ 이 루틴 저장하기
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* CTA */}
       <button className="btn-primary" style={{ marginBottom: 10 }} onClick={() => router.push("/")}>
         {topActions.length > 0 ? "✈️ 잘 맞는 루트로 다시 시작하기" : "✈️ 복구 플랜 시작하기"}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loadLogsFromSupabase, deleteLogsFromSupabase } from "../utils/logs";
+import { getCurrentBadge, getNextBadge, BADGES } from "../utils/badges";
 
 interface LogEntry {
   date: string;
@@ -221,6 +222,63 @@ export default function HistoryPage() {
       )}
 
       {viewMode === "calendar" && log.length > 0 && <CalendarView log={log} />}
+
+      {/* 나의 비행 기록 카드 */}
+      {log.length > 0 && (() => {
+        const total = log.length;
+        const cur = getCurrentBadge(total);
+        const next = getNextBadge(total);
+        const prev = cur ? BADGES[BADGES.indexOf(cur as typeof BADGES[number]) - 1] ?? null : null;
+        const from = prev ? prev.count : 0;
+        const to = next ? next.count : (cur?.count ?? 1);
+        const progress = next ? Math.round(((total - from) / (to - from)) * 100) : 100;
+        return (
+          <div className="ticket" style={{ marginBottom: 16 }}>
+            <div className="ticket-header" style={{ padding: "14px 20px" }}>
+              <div style={{ fontSize: 9, letterSpacing: 2, color: "rgba(255,255,255,0.4)", marginBottom: 6 }}>MY FLIGHT RECORD</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: 28, lineHeight: 1, marginBottom: 4 }}>{cur?.emoji ?? "🛫"}</div>
+                  <div style={{ fontSize: 17, fontWeight: 900, color: "white" }}>{cur?.name ?? "첫 이륙 준비 중"}</div>
+                  {cur && <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{cur.desc}</div>}
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div className="gauge" style={{ fontSize: 38, fontWeight: 900, color: "#6ee7e0", lineHeight: 1 }}>{total}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>총 복구 횟수</div>
+                </div>
+              </div>
+            </div>
+            <div className="ticket-body" style={{ padding: "14px 20px" }}>
+              {next ? (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1A1F36" }}>다음 뱃지: {next.emoji} {next.name}</span>
+                    <span style={{ fontSize: 11, color: "#1DB4A8", fontWeight: 700 }}>{next.count - total}회 남음</span>
+                  </div>
+                  <div style={{ height: 8, background: "rgba(165,210,238,0.3)", borderRadius: 4, overflow: "hidden", marginBottom: 8 }}>
+                    <div style={{ height: "100%", width: `${progress}%`, background: "linear-gradient(90deg, #1DB4A8, #5ce0d8)", borderRadius: 4, transition: "width 0.5s" }} />
+                  </div>
+                  <div style={{ fontSize: 10, color: "#9ab8cc", textAlign: "right" }}>{total - from} / {to - from}</div>
+                </>
+              ) : (
+                <div style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#1DB4A8" }}>🌌 최고 등급 달성! 레전드 파일럿이에요.</div>
+              )}
+              {/* 획득 뱃지 전체 */}
+              <div style={{ marginTop: 12, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {BADGES.map(b => {
+                  const unlocked = total >= b.count;
+                  return (
+                    <div key={b.count} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 20, background: unlocked ? "rgba(29,180,168,0.12)" : "rgba(165,210,238,0.08)", border: `1px solid ${unlocked ? "rgba(29,180,168,0.4)" : "rgba(165,210,238,0.2)"}`, opacity: unlocked ? 1 : 0.45 }}>
+                      <span style={{ fontSize: 13 }}>{b.emoji}</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: unlocked ? "#1A1F36" : "#9ab8cc" }}>{b.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {log.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0" }}>

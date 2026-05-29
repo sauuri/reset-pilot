@@ -38,6 +38,9 @@ export default function Home() {
   const [flightStatus, setFlightStatus] = useState<"ready" | "flying" | "arrived">("ready");
   const [streak, setStreak] = useState(0);
   const [quickMode, setQuickMode] = useState(false);
+  const [weeklyGoal, setWeeklyGoal] = useState(4);
+  const [weeklyCount, setWeeklyCount] = useState(0);
+  const [showGoalPicker, setShowGoalPicker] = useState(false);
 
   useEffect(() => {
     const raw = localStorage.getItem("resetLog");
@@ -59,6 +62,19 @@ export default function Home() {
       else if (d.getTime() < cursor.getTime()) break;
     }
     setStreak(count);
+
+    // 주간 목표
+    const goal = Number(localStorage.getItem("rp_weekly_goal") || "4");
+    setWeeklyGoal(goal);
+    const monday = new Date(today); monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+    const thisWeek = logs.filter(l => {
+      try {
+        const parts = l.date.replace(/\.\s*/g, "-").replace(/-$/, "").split("-").map(Number);
+        const d = new Date(parts[0], parts[1] - 1, parts[2]); d.setHours(0,0,0,0);
+        return d >= monday;
+      } catch { return false; }
+    });
+    setWeeklyCount(new Set(thisWeek.map(l => l.date)).size);
   }, []);
 
   function buildPersonalization() {
@@ -212,10 +228,26 @@ export default function Home() {
             오늘 망한 것 같아도<br />
             <span style={{ color: "#FFE066" }}>딱 하나만 다시 시작해봐요.</span>
           </h1>
-          {streak >= 2 && (
-            <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,160,0,0.18)", border: "1px solid rgba(255,160,0,0.35)", borderRadius: 20, padding: "3px 10px", whiteSpace: "nowrap", maxWidth: "100%" }}>
-              <span style={{ fontSize: 13, lineHeight: 1 }}>🔥</span>
-              <span style={{ fontSize: 11, fontWeight: 800, color: "#FFB830", letterSpacing: 0 }}>{streak}일 연속</span>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+            {streak >= 2 && (
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,160,0,0.18)", border: "1px solid rgba(255,160,0,0.35)", borderRadius: 20, padding: "3px 10px", whiteSpace: "nowrap" }}>
+                <span style={{ fontSize: 13, lineHeight: 1 }}>🔥</span>
+                <span style={{ fontSize: 11, fontWeight: 800, color: "#FFB830" }}>{streak}일 연속</span>
+              </div>
+            )}
+            {/* 주간 목표 */}
+            <div onClick={() => setShowGoalPicker(p => !p)} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: weeklyCount >= weeklyGoal ? "rgba(29,180,168,0.18)" : "rgba(255,255,255,0.1)", border: `1px solid ${weeklyCount >= weeklyGoal ? "rgba(29,180,168,0.4)" : "rgba(255,255,255,0.2)"}`, borderRadius: 20, padding: "3px 10px", whiteSpace: "nowrap", cursor: "pointer" }}>
+              <span style={{ fontSize: 11, lineHeight: 1 }}>{weeklyCount >= weeklyGoal ? "🎯" : "📅"}</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: weeklyCount >= weeklyGoal ? "#1DB4A8" : "rgba(255,255,255,0.7)" }}>이번 주 {weeklyCount}/{weeklyGoal}</span>
+            </div>
+          </div>
+          {showGoalPicker && (
+            <div style={{ marginTop: 6, display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {[3,4,5,7].map(g => (
+                <button key={g} onClick={() => { setWeeklyGoal(g); localStorage.setItem("rp_weekly_goal", String(g)); setShowGoalPicker(false); }} style={{ padding: "4px 12px", borderRadius: 20, border: `1.5px solid ${weeklyGoal === g ? "#1DB4A8" : "rgba(255,255,255,0.2)"}`, background: weeklyGoal === g ? "rgba(29,180,168,0.2)" : "rgba(255,255,255,0.1)", color: weeklyGoal === g ? "#1DB4A8" : "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  주 {g}회
+                </button>
+              ))}
             </div>
           )}
         </div>
