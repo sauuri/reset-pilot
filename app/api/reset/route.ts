@@ -9,7 +9,8 @@ interface Personalization {
 
 function buildPersonalizationBlock(p: Personalization): string {
   const rates = p.completionRates;
-  const sorted = (["Body Reset", "Space Reset", "Life Reset"] as const)
+  const sorted = (["Body Reset", "Space Reset", "Life Reset"] as Array<keyof typeof rates>)
+    .slice()
     .sort((a, b) => rates[b] - rates[a]);
   const preferred = sorted.filter(k => rates[k] >= 50).join(", ") || "없음";
   const difficult = sorted.filter(k => rates[k] < 30).join(", ") || "없음";
