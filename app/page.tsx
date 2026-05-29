@@ -6,6 +6,7 @@ import SplashScreen from "./components/SplashScreen";
 import LoadingScreen from "./components/LoadingScreen";
 import TakeoffAnimation from "./components/TakeoffAnimation";
 import { supabase } from "./utils/supabase";
+import { saveLogToSupabase } from "./utils/logs";
 
 export default function Home() {
   const router = useRouter();
@@ -45,10 +46,13 @@ export default function Home() {
         body: JSON.stringify({ text, energy, anxiety, timeLeft }),
       });
       const data = await res.json();
+      const ts = Date.now();
+      const logEntry = { ...data, date: new Date().toLocaleDateString("ko-KR"), input: text, energy, anxiety, completedCount: 0, completedActions: [], moodAfter: null, ts };
       localStorage.setItem("resetResult", JSON.stringify(data));
       const log = JSON.parse(localStorage.getItem("resetLog") || "[]");
-      log.unshift({ ...data, date: new Date().toLocaleDateString("ko-KR"), input: text, energy, anxiety, completedCount: 0, completedActions: [], moodAfter: null });
+      log.unshift(logEntry);
       localStorage.setItem("resetLog", JSON.stringify(log.slice(0, 30)));
+      saveLogToSupabase(logEntry);
       setFlightStatus("arrived");
     } catch {
       alert("오류가 발생했어요. 다시 시도해주세요.");

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { loadLogsFromSupabase } from "../utils/logs";
 
 interface LogEntry {
   date: string;
@@ -23,8 +24,14 @@ export default function HistoryPage() {
   const [log, setLog] = useState<LogEntry[]>([]);
 
   useEffect(() => {
-    const raw = localStorage.getItem("resetLog");
-    if (raw) setLog(JSON.parse(raw));
+    loadLogsFromSupabase().then((remote) => {
+      if (remote && remote.length > 0) {
+        setLog(remote as unknown as LogEntry[]);
+      } else {
+        const raw = localStorage.getItem("resetLog");
+        if (raw) setLog(JSON.parse(raw));
+      }
+    });
   }, []);
 
   function clearLog() {
