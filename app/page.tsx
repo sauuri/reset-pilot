@@ -220,13 +220,7 @@ export default function Home() {
           )}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 5, flexShrink: 0 }}>
-          {/* 1행: ⚡ 📋 🔔 */}
-          <div style={{ display: "flex", gap: 5 }}>
-            <button onClick={() => setQuickMode(true)} style={{ background: "rgba(255,200,0,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,200,0,0.35)", color: "#FFE066", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", fontWeight: 900, lineHeight: 1 }} title="30초 빠른 복구">⚡</button>
-            <button onClick={() => router.push("/history")} style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)", color: "white", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", lineHeight: 1 }}>📋</button>
-            <button onClick={() => router.push("/notifications")} style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", color: "white", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", lineHeight: 1 }}>🔔</button>
-          </div>
-          {/* 2행: 로그인/아웃 */}
+          {/* 1행: 로그인/아웃 */}
           {user ? (
             <button onClick={async () => { await supabase.auth.signOut(); setUser(null); }} style={{ background: "rgba(255,255,255,0.1)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.55)", borderRadius: 9, padding: "5px 8px", fontSize: 10, fontWeight: 700, cursor: "pointer", textAlign: "center" }}>
               로그아웃
@@ -236,6 +230,12 @@ export default function Home() {
               로그인
             </button>
           ) : null}
+          {/* 2행: ⚡ 📋 🔔 */}
+          <div style={{ display: "flex", gap: 5 }}>
+            <button onClick={() => setQuickMode(true)} style={{ background: "rgba(255,200,0,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,200,0,0.35)", color: "#FFE066", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", fontWeight: 900, lineHeight: 1 }} title="30초 빠른 복구">⚡</button>
+            <button onClick={() => router.push("/history")} style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)", color: "white", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", lineHeight: 1 }}>📋</button>
+            <button onClick={() => router.push("/notifications")} style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", color: "white", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", lineHeight: 1 }}>🔔</button>
+          </div>
         </div>
       </div>
 
