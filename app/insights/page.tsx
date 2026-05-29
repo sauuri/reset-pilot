@@ -8,7 +8,7 @@ interface LogEntry {
   input: string;
   ruinScore: number;
   recoverScore: number;
-  actions: { title: string }[];
+  actions: { title: string; name?: string }[];
   mode?: string;
   energy?: number;
   anxiety?: number;
@@ -125,6 +125,30 @@ export default function InsightsPage() {
   const successRate = Math.round((anyChecked / total) * 100);
   const avgCompleted = log.reduce((s, e) => s + (e.completedCount ?? 0), 0) / total;
 
+  // 복구 액션 타입 분석
+  const typeTotal: Record<string, number> = { "Body Reset": 0, "Space Reset": 0, "Life Reset": 0 };
+  const typeDone:  Record<string, number> = { "Body Reset": 0, "Space Reset": 0, "Life Reset": 0 };
+  log.forEach(e => {
+    (e.actions ?? []).forEach(a => {
+      const n = a.name ?? "";
+      if (typeTotal[n] !== undefined) {
+        typeTotal[n]++;
+        if ((e.completedActions ?? []).includes(a.title)) typeDone[n]++;
+      }
+    });
+  });
+  const typeRates = Object.fromEntries(
+    Object.keys(typeTotal).map(k => [k, typeTotal[k] > 0 ? Math.round((typeDone[k] / typeTotal[k]) * 100) : null])
+  );
+  const dominantType = Object.entries(typeRates)
+    .filter(([, v]) => v !== null)
+    .sort(([, a], [, b]) => (b as number) - (a as number))[0]?.[0];
+  const typePersonality: Record<string, { emoji: string; label: string; desc: string }> = {
+    "Body Reset":  { emoji: "💪", label: "몸을 먼저 움직이는 타입", desc: "샤워, 스트레칭, 산책 같은 신체 행동에서 복구 에너지를 얻어요. 머리보다 몸이 먼저예요." },
+    "Space Reset": { emoji: "🧹", label: "공간 정리로 흐름 잡는 타입", desc: "주변을 정리하면서 머릿속도 같이 정리돼요. 눈앞이 깔끔해져야 시작할 수 있는 타입이에요." },
+    "Life Reset":  { emoji: "📝", label: "작은 실행으로 시동 거는 타입", desc: "메모, 계획, 연락 같은 생산적 행동이 복구의 시작이에요. 뭔가를 '해냈다'는 감각이 필요해요." },
+  };
+
   const modeCount: Record<string, number> = {};
   log.forEach(e => { const m = e.mode ?? "Unknown"; modeCount[m] = (modeCount[m] ?? 0) + 1; });
 
@@ -217,6 +241,43 @@ export default function InsightsPage() {
           </div>
         </div>
       </div>
+
+      {/* 🏋️ 복구 액션 스타일 */}
+      {Object.values(typeRates).some(v => v !== null) && (
+        <div className="ticket animate-fadeInUp animate-delay-2" style={{ marginBottom: 14 }}>
+          <div className="ticket-header" style={{ padding: "12px 20px" }}>
+            <div className="ticket-label" style={{ color: "rgba(255,255,255,0.5)" }}>🏋️ 나의 복구 액션 스타일</div>
+          </div>
+          <div className="ticket-body">
+            {dominantType && typePersonality[dominantType] && (
+              <div style={{ marginBottom: 14, padding: "12px 14px", background: "rgba(29,180,168,0.08)", borderRadius: 10, border: "1.5px solid rgba(29,180,168,0.25)" }}>
+                <div style={{ fontSize: 22, marginBottom: 4 }}>{typePersonality[dominantType].emoji}</div>
+                <div style={{ fontSize: 15, fontWeight: 900, color: "#0A2463", marginBottom: 4 }}>{typePersonality[dominantType].label}</div>
+                <div style={{ fontSize: 12, color: "#4e6e82", lineHeight: 1.6 }}>{typePersonality[dominantType].desc}</div>
+              </div>
+            )}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {(["Body Reset", "Space Reset", "Life Reset"] as const).map(type => {
+                const rate = typeRates[type];
+                const icons: Record<string, string> = { "Body Reset": "💪", "Space Reset": "🧹", "Life Reset": "📝" };
+                return (
+                  <div key={type}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "#1A1F36" }}>{icons[type]} {type}</span>
+                      <span style={{ fontSize: 11, color: rate !== null ? "#1DB4A8" : "#9ab8cc", fontWeight: 700 }}>
+                        {rate !== null ? `${rate}%` : "데이터 없음"}
+                      </span>
+                    </div>
+                    <div style={{ height: 6, background: "rgba(165,210,238,0.3)", borderRadius: 3, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${rate ?? 0}%`, background: type === dominantType ? "#1DB4A8" : "#5b9bd5", borderRadius: 3, transition: "width 0.5s" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 🔁 자주 나타나는 원인 — accordion */}
       {topPatterns.length > 0 && (

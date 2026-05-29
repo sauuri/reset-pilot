@@ -122,6 +122,21 @@ function ResultContent() {
     setTimer(null);
   }
 
+  async function shareResult() {
+    if (!result) return;
+    const moodText = moodAfter === "better" ? "😊 기분이 나아졌어요" : moodAfter === "same" ? "😐 비슷해요" : moodAfter === "worse" ? "😔 아직 힘들어요" : "";
+    const actionLines = result.actions.map((a, i) => `${checked[i] ? "✅" : "⬜"} ${a.title}`).join("\n");
+    const text = `✈️ Reset Pilot — 오늘 복구 기록\n${"─".repeat(22)}\n부담도 ${result.ruinScore}% → 흐름 되찾는 중\n\n${actionLines}\n${checkedCount > 0 ? `\n완료 ${checkedCount}/3 🎯` : ""}${moodText ? `\n${moodText}` : ""}\n\n#ResetPilot #망한하루복구`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Reset Pilot", text, url: "https://reset-pilot.vercel.app" });
+      } else {
+        await navigator.clipboard.writeText(text);
+        alert("클립보드에 복사됐어요!");
+      }
+    } catch { /* 취소 */ }
+  }
+
   useEffect(() => {
     if (isDemo) { setResult(SAMPLE); return; }
     const raw = localStorage.getItem("resetResult");
@@ -604,9 +619,22 @@ function ResultContent() {
           ✈️ 다시 입력하기
         </button>
       )}
-      <button className="btn-ghost" style={{ marginTop: 10 }} onClick={() => router.push("/history")}>
-        📋 기록 보기
-      </button>
+      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+        <button className="btn-ghost" style={{ flex: 1 }} onClick={() => router.push("/history")}>
+          📋 기록 보기
+        </button>
+        <button
+          onClick={shareResult}
+          style={{
+            flex: 1, padding: "12px", borderRadius: 12, cursor: "pointer",
+            background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)",
+            border: "1px solid rgba(255,255,255,0.22)",
+            color: "white", fontSize: 13, fontWeight: 700,
+          }}
+        >
+          🔗 공유하기
+        </button>
+      </div>
 
       {result.mode === "Crash Mode" && !isDemo && (
         <div style={{

@@ -19,9 +19,87 @@ interface LogEntry {
   moodAfter?: "better" | "same" | "worse" | null;
 }
 
+function parseLogDate(dateStr: string): string {
+  // "2026. 5. 29." → "2026-05-29"
+  const parts = dateStr.replace(/\.\s*/g, "-").replace(/-$/, "").split("-").map(s => s.trim().padStart(2, "0"));
+  return parts.join("-");
+}
+
+function CalendarView({ log }: { log: LogEntry[] }) {
+  const today = new Date();
+  const [year, setYear] = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth()); // 0-indexed
+
+  const dateMap: Record<string, "better" | "same" | "worse" | "none"> = {};
+  log.forEach(e => {
+    try {
+      const key = parseLogDate(e.date);
+      dateMap[key] = e.moodAfter ?? "none";
+    } catch { /* skip */ }
+  });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const moodColor: Record<string, string> = { better: "#1DB4A8", same: "#F59E0B", worse: "#E53935", none: "#5b9bd5" };
+  const moodEmoji: Record<string, string> = { better: "😊", same: "😐", worse: "😔", none: "✓" };
+
+  return (
+    <div className="ticket" style={{ marginBottom: 16 }}>
+      <div className="ticket-body" style={{ padding: "14px 16px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <button onClick={() => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); }}
+            style={{ background: "none", border: "none", color: "#7facca", fontSize: 18, cursor: "pointer", padding: "0 4px" }}>‹</button>
+          <span style={{ fontSize: 14, fontWeight: 800, color: "#1A1F36" }}>{year}년 {month + 1}월</span>
+          <button onClick={() => { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); }}
+            style={{ background: "none", border: "none", color: "#7facca", fontSize: 18, cursor: "pointer", padding: "0 4px" }}>›</button>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 6 }}>
+          {["일","월","화","수","목","금","토"].map(d => (
+            <div key={d} style={{ textAlign: "center", fontSize: 10, color: "#9ab8cc", fontWeight: 700, paddingBottom: 4 }}>{d}</div>
+          ))}
+          {cells.map((day, i) => {
+            if (!day) return <div key={i} />;
+            const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            const mood = dateMap[key];
+            const isToday = key === todayKey;
+            return (
+              <div key={i} style={{ textAlign: "center", padding: "3px 0" }}>
+                <div style={{
+                  width: 28, height: 28, margin: "0 auto", borderRadius: "50%",
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  background: mood ? moodColor[mood] : isToday ? "rgba(165,210,238,0.2)" : "transparent",
+                  border: isToday && !mood ? "1.5px solid rgba(165,210,238,0.5)" : "none",
+                  fontSize: mood ? 11 : 11,
+                  color: mood ? "white" : isToday ? "#7facca" : "#9ab8cc",
+                  fontWeight: isToday ? 800 : 400,
+                }}>
+                  {mood ? moodEmoji[mood] : day}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 6 }}>
+          {[["😊", "#1DB4A8", "나아짐"], ["😐", "#F59E0B", "비슷"], ["😔", "#E53935", "힘듦"], ["✓", "#5b9bd5", "기록"]].map(([emoji, color, label]) => (
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 10, color: "#9ab8cc" }}>
+              <div style={{ width: 14, height: 14, borderRadius: "50%", background: color as string, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8 }}>{emoji}</div>
+              {label}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function HistoryPage() {
   const router = useRouter();
   const [log, setLog] = useState<LogEntry[]>([]);
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
 
   useEffect(() => {
     loadLogsFromSupabase().then((remote) => {
@@ -67,21 +145,34 @@ export default function HistoryPage() {
       </div>
 
       {log.length >= 3 && (
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 16, display: "flex", gap: 8 }}>
           <button
             onClick={() => router.push("/insights")}
             style={{
-              width: "100%", padding: "12px 20px", borderRadius: 12,
+              flex: 1, padding: "12px 20px", borderRadius: 12,
               background: "linear-gradient(135deg, #0A2463 0%, #163678 100%)",
               border: "1px solid rgba(255,255,255,0.15)",
               color: "white", fontSize: 14, fontWeight: 700, cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             }}
           >
-            📊 패턴 분석 보기
+            📊 패턴 분석
+          </button>
+          <button
+            onClick={() => setViewMode(v => v === "list" ? "calendar" : "list")}
+            style={{
+              padding: "12px 16px", borderRadius: 12,
+              background: viewMode === "calendar" ? "rgba(29,180,168,0.2)" : "rgba(255,255,255,0.15)",
+              border: `1px solid ${viewMode === "calendar" ? "rgba(29,180,168,0.5)" : "rgba(255,255,255,0.2)"}`,
+              color: "white", fontSize: 18, cursor: "pointer",
+            }}
+          >
+            📅
           </button>
         </div>
       )}
+
+      {viewMode === "calendar" && log.length > 0 && <CalendarView log={log} />}
 
       {log.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0" }}>

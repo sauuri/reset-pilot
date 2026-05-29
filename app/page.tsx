@@ -168,20 +168,29 @@ export default function Home() {
             {/* 상태 입력 */}
             <div>
               <div className="ticket-label">현재 상태 — 오늘 어떤 하루였어?</div>
-              {/* 빠른 태그 */}
+              {/* 상황 빠른선택 */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 5, margin: "6px 0" }}>
-                {["늦게 일어남", "무기력함", "불안함", "방 엉망", "할 일 많음", "폰만 봄", "아무것도 하기 싫음"].map((tag) => (
+                {[
+                  { emoji: "💀", tag: "완전 번아웃",   text: "오늘 완전 번아웃이야. 아무것도 하기 싫고 머리도 멍해. 그냥 다 놔버리고 싶어." },
+                  { emoji: "😴", tag: "늦잠·무기력",   text: "늦게 일어나서 하루 망친 것 같아. 무기력하고 아무 의욕이 없어." },
+                  { emoji: "😰", tag: "불안·걱정",      text: "불안하고 걱정이 너무 많아. 해야 할 게 쌓여있는데 시작을 못 하겠어." },
+                  { emoji: "📱", tag: "폰만 보다가",    text: "하루종일 폰만 봤어. 유튜브, SNS 돌리다 시간 다 갔어. 해야 할 게 있는데 못 했어." },
+                  { emoji: "📚", tag: "공부 못한 날",   text: "오늘 공부를 거의 못 했어. 집중이 안 되고 자꾸 딴짓만 했어." },
+                  { emoji: "🏠", tag: "방이 엉망",      text: "방이 너무 지저분한데 치울 의욕이 없어. 어디서부터 시작해야 할지 모르겠어." },
+                ].map(({ emoji, tag, text: tpl }) => (
                   <button
                     key={tag}
-                    onClick={() => setText((prev) => prev ? `${prev}, ${tag}` : tag)}
+                    onClick={() => setText(tpl)}
                     style={{
                       fontSize: 11, fontWeight: 700, padding: "5px 10px", borderRadius: 20,
-                      border: "1.5px solid rgba(165,210,238,0.55)",
-                      background: "rgba(255,255,255,0.35)", backdropFilter: "blur(4px)",
-                      color: "#2a4a60", cursor: "pointer", transition: "all 0.15s",
+                      border: `1.5px solid ${text === tpl ? "rgba(29,180,168,0.7)" : "rgba(165,210,238,0.55)"}`,
+                      background: text === tpl ? "rgba(29,180,168,0.12)" : "rgba(255,255,255,0.35)",
+                      backdropFilter: "blur(4px)",
+                      color: text === tpl ? "#1DB4A8" : "#2a4a60",
+                      cursor: "pointer", transition: "all 0.15s",
                     }}
                   >
-                    {tag}
+                    {emoji} {tag}
                   </button>
                 ))}
               </div>
