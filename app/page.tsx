@@ -213,9 +213,9 @@ export default function Home() {
             <span style={{ color: "#FFE066" }}>딱 하나만 다시 시작해봐요.</span>
           </h1>
           {streak >= 2 && (
-            <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,160,0,0.18)", border: "1px solid rgba(255,160,0,0.35)", borderRadius: 20, padding: "4px 12px" }}>
-              <span style={{ fontSize: 14 }}>🔥</span>
-              <span style={{ fontSize: 12, fontWeight: 800, color: "#FFB830" }}>{streak}일 연속 복구 중</span>
+            <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,160,0,0.18)", border: "1px solid rgba(255,160,0,0.35)", borderRadius: 20, padding: "3px 10px", whiteSpace: "nowrap", maxWidth: "100%" }}>
+              <span style={{ fontSize: 13, lineHeight: 1 }}>🔥</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: "#FFB830", letterSpacing: 0 }}>{streak}일 연속</span>
             </div>
           )}
         </div>

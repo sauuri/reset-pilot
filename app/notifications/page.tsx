@@ -21,7 +21,7 @@ export default function NotificationsPage() {
   const router = useRouter();
   const [schedules, setSchedules] = useState<NotifSchedule[]>(PRESETS);
   const [customHour, setCustomHour] = useState(20);
-  const [customMin, setCustomMin] = useState(0);
+  const [customMin, setCustomMin] = useState(30);
   const [permGranted, setPermGranted] = useState<boolean | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -155,14 +155,21 @@ export default function NotificationsPage() {
 
           {/* 커스텀 시간 추가 */}
           <div style={{ marginTop: 14, padding: "12px 14px", background: "rgba(240,247,252,0.6)", borderRadius: 10, border: "1px solid rgba(165,210,238,0.3)" }}>
-            <div style={{ fontSize: 11, color: "#7facca", fontWeight: 700, marginBottom: 8 }}>+ 다른 시간 추가</div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <input type="number" min={0} max={23} value={customHour} onChange={e => setCustomHour(Number(e.target.value))}
-                style={{ width: 56, padding: "8px", borderRadius: 8, border: "1.5px solid rgba(165,210,238,0.5)", background: "white", fontSize: 16, fontWeight: 700, textAlign: "center", color: "#1A1F36" }} />
-              <span style={{ color: "#7facca", fontWeight: 900, fontSize: 18 }}>:</span>
-              <input type="number" min={0} max={59} step={5} value={customMin} onChange={e => setCustomMin(Number(e.target.value))}
-                style={{ width: 56, padding: "8px", borderRadius: 8, border: "1.5px solid rgba(165,210,238,0.5)", background: "white", fontSize: 16, fontWeight: 700, textAlign: "center", color: "#1A1F36" }} />
-              <button onClick={addCustom} style={{ flex: 1, padding: "8px", borderRadius: 8, border: "none", background: "#0A2463", color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>추가</button>
+            <div style={{ fontSize: 11, color: "#7facca", fontWeight: 700, marginBottom: 10 }}>+ 다른 시간 추가</div>
+            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <select value={customHour} onChange={e => setCustomHour(Number(e.target.value))}
+                style={{ flex: 1, padding: "8px 6px", borderRadius: 8, border: "1.5px solid rgba(165,210,238,0.5)", background: "white", fontSize: 14, fontWeight: 700, color: "#1A1F36", appearance: "none", textAlign: "center" }}>
+                {Array.from({ length: 24 }, (_, i) => (
+                  <option key={i} value={i}>{String(i).padStart(2, "0")}시</option>
+                ))}
+              </select>
+              <select value={customMin} onChange={e => setCustomMin(Number(e.target.value))}
+                style={{ flex: 1, padding: "8px 6px", borderRadius: 8, border: "1.5px solid rgba(165,210,238,0.5)", background: "white", fontSize: 14, fontWeight: 700, color: "#1A1F36", appearance: "none", textAlign: "center" }}>
+                {[0, 10, 20, 30, 40, 50].map(m => (
+                  <option key={m} value={m}>{String(m).padStart(2, "0")}분</option>
+                ))}
+              </select>
+              <button onClick={addCustom} style={{ flex: 1, padding: "9px", borderRadius: 8, border: "none", background: "#0A2463", color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>추가</button>
             </div>
           </div>
         </div>
