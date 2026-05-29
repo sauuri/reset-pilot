@@ -2,8 +2,30 @@ import OpenAI from "openai";
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+interface Personalization {
+  completionRates: { "Body Reset": number; "Space Reset": number; "Life Reset": number };
+  recentActions: string[];
+}
+
+function buildPersonalizationBlock(p: Personalization): string {
+  const rates = p.completionRates;
+  const sorted = (["Body Reset", "Space Reset", "Life Reset"] as const)
+    .sort((a, b) => rates[b] - rates[a]);
+  const preferred = sorted.filter(k => rates[k] >= 50).join(", ") || "없음";
+  const difficult = sorted.filter(k => rates[k] < 30).join(", ") || "없음";
+  const recent = p.recentActions.length > 0 ? p.recentActions.join(", ") : "없음";
+  return `
+사용자 과거 패턴 (개인화):
+- 완료율 높은 유형 (선호): ${preferred}
+- 완료율 낮은 유형 (어려워함): ${difficult}
+- 최근 나온 행동 (반복 금지): ${recent}
+→ 완료율 높은 유형을 우선 고려하되, 위 행동은 피하고 새로운 행동을 제안하세요.`;
+}
+
 export async function POST(request: Request) {
-  const { text, energy, anxiety, timeLeft } = await request.json();
+  const { text, energy, anxiety, timeLeft, personalization } = await request.json();
+
+  const personalizationBlock = personalization ? buildPersonalizationBlock(personalization as Personalization) : "";
 
   const prompt = `너는 ResetPilot, AI 하루 복구 관제사다.
 사용자의 하루 상태를 분석해서 "생산성 조언"이 아니라 "오늘을 0점으로 끝내지 않기 위한 최소 복구 루트"를 만들어라.
@@ -21,6 +43,7 @@ export async function POST(request: Request) {
 - 에너지: ${energy}/10
 - 불안/스트레스: ${anxiety}/10
 - 남은 시간: ${timeLeft}
+${personalizationBlock}
 
 모드 판정 기준:
 - Crash Mode: 에너지 낮고 불안 높음, 완전히 무너진 상태

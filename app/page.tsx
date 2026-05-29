@@ -34,16 +34,49 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [flightStatus, setFlightStatus] = useState<"ready" | "flying" | "arrived">("ready");
 
+  function buildPersonalization() {
+    const raw = localStorage.getItem("resetLog");
+    if (!raw) return null;
+    const logs: Array<{ actions?: { name: string; title: string }[]; completedActions?: string[] }> = JSON.parse(raw);
+    if (logs.length < 2) return null;
+
+    const counts: Record<string, { total: number; done: number }> = {
+      "Body Reset": { total: 0, done: 0 },
+      "Space Reset": { total: 0, done: 0 },
+      "Life Reset": { total: 0, done: 0 },
+    };
+    const recentActions: string[] = [];
+
+    logs.slice(0, 10).forEach((log, i) => {
+      (log.actions ?? []).forEach(a => {
+        if (counts[a.name]) {
+          counts[a.name].total++;
+          if ((log.completedActions ?? []).includes(a.title)) counts[a.name].done++;
+        }
+        if (i < 3) recentActions.push(a.title);
+      });
+    });
+
+    const completionRates = {
+      "Body Reset":  counts["Body Reset"].total  ? Math.round(counts["Body Reset"].done  / counts["Body Reset"].total  * 100) : 50,
+      "Space Reset": counts["Space Reset"].total ? Math.round(counts["Space Reset"].done / counts["Space Reset"].total * 100) : 50,
+      "Life Reset":  counts["Life Reset"].total  ? Math.round(counts["Life Reset"].done  / counts["Life Reset"].total  * 100) : 50,
+    };
+
+    return { completionRates, recentActions: [...new Set(recentActions)] };
+  }
+
   async function handleSubmit() {
     if (!text.trim()) return;
     setLoading(true);
     setFlightStatus("flying");
     try {
       const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
+      const personalization = buildPersonalization();
       const res = await fetch(`${apiBase}/api/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, energy, anxiety, timeLeft }),
+        body: JSON.stringify({ text, energy, anxiety, timeLeft, personalization }),
       });
       const data = await res.json();
       const ts = Date.now();
