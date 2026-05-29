@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { loadLogsFromSupabase } from "../utils/logs";
+import { loadLogsFromSupabase, deleteLogsFromSupabase } from "../utils/logs";
 
 interface LogEntry {
   date: string;
@@ -17,6 +17,7 @@ interface LogEntry {
   completedCount?: number;
   completedActions?: string[];
   moodAfter?: "better" | "same" | "worse" | null;
+  _id?: string;
 }
 
 function parseLogDate(dateStr: string): string {
@@ -116,12 +117,16 @@ export default function HistoryPage() {
 
   function clearLog() {
     if (confirm("기록을 전부 삭제할까요?")) {
+      const ids = log.map(e => e._id).filter(Boolean) as string[];
+      if (ids.length > 0) deleteLogsFromSupabase(ids);
       localStorage.removeItem("resetLog");
       setLog([]);
     }
   }
 
   function deleteEntry(i: number) {
+    const entry = log[i];
+    if (entry._id) deleteLogsFromSupabase([entry._id]);
     const next = log.filter((_, idx) => idx !== i);
     setLog(next);
     localStorage.setItem("resetLog", JSON.stringify(next));
@@ -138,6 +143,8 @@ export default function HistoryPage() {
   function deleteSelected() {
     if (selected.size === 0) return;
     if (!confirm(`선택한 ${selected.size}개를 삭제할까요?`)) return;
+    const ids = [...selected].map(i => log[i]._id).filter(Boolean) as string[];
+    if (ids.length > 0) deleteLogsFromSupabase(ids);
     const next = log.filter((_, i) => !selected.has(i));
     setLog(next);
     localStorage.setItem("resetLog", JSON.stringify(next));

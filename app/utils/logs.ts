@@ -45,6 +45,12 @@ export async function updateLogInSupabase(
     .eq("created_at", created_at);
 }
 
+export async function deleteLogsFromSupabase(ids: string[]) {
+  const user = await getUser();
+  if (!user || ids.length === 0) return;
+  await supabase.from("recovery_logs").delete().eq("user_id", user.id).in("id", ids);
+}
+
 export async function loadLogsFromSupabase() {
   const user = await getUser();
   if (!user) return null;
