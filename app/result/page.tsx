@@ -149,7 +149,7 @@ function ResultContent() {
   return (
     <>
     {showLanding && <LandingAnimation completedCount={checkedCount} onDone={() => router.push("/")} />}
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: "calc(24px + env(safe-area-inset-top, 0px)) 16px 80px" }}>
+    <main style={{ maxWidth: 480, margin: "0 auto", padding: "24px 16px 80px" }}>
 
       {/* 헤더 */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>

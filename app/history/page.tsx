@@ -48,7 +48,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: "calc(32px + env(safe-area-inset-top, 0px)) 16px 80px" }}>
+    <main style={{ maxWidth: 480, margin: "0 auto", padding: "32px 16px 80px" }}>
 
       {/* 헤더 */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
