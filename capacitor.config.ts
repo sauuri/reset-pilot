@@ -6,6 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     url: 'https://reset-pilot.vercel.app',
+    allowNavigation: ['*.apple.com', 'appleid.apple.com', '*.supabase.co'],
   },
   ios: {
     contentInset: 'automatic',

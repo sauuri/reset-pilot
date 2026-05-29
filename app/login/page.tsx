@@ -3,42 +3,12 @@ export const dynamic = "force-dynamic";
 
 import { supabase } from "../utils/supabase";
 
-async function isCapacitor(): Promise<boolean> {
-  if (typeof window === "undefined") return false;
-  try {
-    const { Capacitor } = await import("@capacitor/core");
-    return Capacitor.isNativePlatform();
-  } catch {
-    return false;
-  }
-}
-
 export default function LoginPage() {
   async function signInWithApple() {
-    const redirectTo = `${window.location.origin}/auth/callback`;
-    const native = await isCapacitor();
-
-    if (native) {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "apple",
-        options: { redirectTo, skipBrowserRedirect: true },
-      });
-      if (error || !data.url) { alert("오류: " + error?.message); return; }
-
-      const { Browser } = await import("@capacitor/browser");
-      await Browser.open({ url: data.url });
-
-      // 인앱 브라우저 닫힌 후 세션 체크
-      Browser.addListener("browserFinished", async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) window.location.href = "/";
-      });
-    } else {
-      await supabase.auth.signInWithOAuth({
-        provider: "apple",
-        options: { redirectTo },
-      });
-    }
+    await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
   }
 
   return (
