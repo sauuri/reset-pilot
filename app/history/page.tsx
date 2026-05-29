@@ -211,7 +211,7 @@ export default function HistoryPage() {
         </div>
       </div>
 
-      {log.length >= 3 && (
+      {log.length >= 1 && (
         <div style={{ marginBottom: 16, display: "flex", gap: 8 }}>
           <button
             onClick={() => router.push("/insights")}
