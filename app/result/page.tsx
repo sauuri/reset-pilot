@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import LandingAnimation from "../components/LandingAnimation";
 import { updateLogInSupabase } from "../utils/logs";
 import { getCurrentBadge, getNextBadge } from "../utils/badges";
+import { playCheck, playTimerDone, playBadge, playPop, playChime, playTap } from "../utils/sounds";
 
 interface Action {
   name: string;
@@ -110,7 +111,7 @@ function ResultContent() {
     const total = log.length;
     const cur = getCurrentBadge(total);
     const prev = getCurrentBadge(total - 1);
-    if (cur && cur.count !== prev?.count) setNewBadge(cur);
+    if (cur && cur.count !== prev?.count) { setNewBadge(cur); playBadge(); }
   }, [result, isDemo]);
 
   function toggleSave() {
@@ -139,6 +140,7 @@ function ResultContent() {
           if (!t || t.done) return t;
           const elapsed = Math.floor((Date.now() - t.startedAt) / 1000);
           const remaining = Math.max(0, t.startedRemaining - elapsed);
+          if (remaining <= 0) playTimerDone();
           return remaining <= 0 ? { ...t, remaining: 0, done: true } : { ...t, remaining };
         });
       }
@@ -150,7 +152,7 @@ function ResultContent() {
         if (!t || t.done) { clearInterval(id); return t; }
         const elapsed = Math.floor((Date.now() - t.startedAt) / 1000);
         const remaining = Math.max(0, t.startedRemaining - elapsed);
-        if (remaining <= 0) { clearInterval(id); return { ...t, remaining: 0, done: true }; }
+        if (remaining <= 0) { clearInterval(id); playTimerDone(); return { ...t, remaining: 0, done: true }; }
         return { ...t, remaining };
       });
     }, 1000);
@@ -178,6 +180,7 @@ function ResultContent() {
     log[0] = { ...log[0], journal };
     localStorage.setItem("resetLog", JSON.stringify(log));
     setJournalSaved(true);
+    playChime();
   }
 
   async function shareResult() {
@@ -262,6 +265,7 @@ function ResultContent() {
   function toggle(i: number) {
     const next = [...checked];
     next[i] = !next[i];
+    if (!checked[i]) playCheck();
     setChecked(next);
   }
 
@@ -587,7 +591,7 @@ function ResultContent() {
               ]).map(({ value, emoji, label }) => (
                 <button
                   key={value}
-                  onClick={() => setMoodAfter(value)}
+                  onClick={() => { setMoodAfter(value); playPop(); }}
                   style={{
                     flex: 1, padding: "10px 6px", borderRadius: 10,
                     border: "1.5px solid",
@@ -704,7 +708,7 @@ function ResultContent() {
       {checkedCount >= 1 ? (
         <button
           className="animate-fadeInUp animate-delay-3"
-          onClick={() => setShowLanding(true)}
+          onClick={() => { playTap(); setShowLanding(true); }}
           style={{
             width: "100%", border: "none", borderRadius: 16,
             padding: "18px 28px", fontSize: 17, fontWeight: 900,

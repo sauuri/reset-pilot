@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getSkyMode, SKY_BG, RUNWAY_BG } from "../utils/skyTheme";
+import { playTakeoff } from "../utils/sounds";
 
 const STARS: [number, number][] = [
   [8,12],[13,78],[22,88],[6,45],[18,23],[30,67],[10,90],
@@ -21,8 +22,8 @@ export default function TakeoffAnimation({ onDone }: { onDone: () => void }) {
     const t = [
       setTimeout(() => setPhase(1), 450),
       setTimeout(() => setPhase(2), 1100),
-      setTimeout(() => setPhase(3), 2700),
-      setTimeout(onDone, 4600),  // 이륙 후 화면 벗어날 시간 확보
+      setTimeout(() => { setPhase(3); playTakeoff(); }, 2700),
+      setTimeout(onDone, 4600),
     ];
     return () => t.forEach(clearTimeout);
   }, [onDone]);

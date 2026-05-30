@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getSkyMode, SKY_BG, RUNWAY_BG } from "../utils/skyTheme";
+import { playLanding, playBadge } from "../utils/sounds";
 
 const STARS: [number, number][] = [
   [8,12],[13,78],[22,88],[6,45],[18,23],[30,67],[10,90],
@@ -17,11 +18,11 @@ export default function LandingAnimation({ onDone, completedCount = 3 }: { onDon
   useEffect(() => {
     const t: ReturnType<typeof setTimeout>[] = [
       setTimeout(() => setPhase(1), 500),
-      setTimeout(() => setPhase(2), 1900),   // 착지 바운스 시작
-      setTimeout(() => setPhase(3), 3300),   // 바운스 1.3s 후 택시
+      setTimeout(() => { setPhase(2); playLanding(); }, 1900),
+      setTimeout(() => setPhase(3), 3300),
     ];
     if (completedCount >= 2) {
-      t.push(setTimeout(() => setPhase(4), 4400));
+      t.push(setTimeout(() => { setPhase(4); playBadge(); }, 4400));
       t.push(setTimeout(onDone, 7700));  // 멘트 표시 후 1.5초 더 대기
     } else {
       t.push(setTimeout(onDone, 6500));
