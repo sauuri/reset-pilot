@@ -157,24 +157,16 @@ export default function LandingAnimation({ onDone, completedCount = 3 }: { onDon
         }}>
           <div style={{ animation: "fadeInUp 0.5s ease 0.3s both" }}>
             <div style={{
-              fontSize: 20, fontWeight: 900, color: "white",
+              fontSize: 16, fontWeight: 900, color: "white",
               textShadow: "0 2px 16px rgba(0,0,0,0.5)",
               background: "rgba(0,0,0,0.32)",
               backdropFilter: "blur(12px)",
-              padding: "10px 22px", borderRadius: 16,
+              padding: "14px 20px", borderRadius: 16,
+              lineHeight: 1.7, textAlign: "center", maxWidth: 260,
             }}>
-              {completedCount === 3 ? "🎉 오늘 착륙 완료!" : "🛬 착지 완료!"}
-            </div>
-            <div style={{
-              fontSize: 13, color: "rgba(255,255,255,0.8)",
-              marginTop: 8, fontWeight: 600,
-              textShadow: "0 1px 8px rgba(0,0,0,0.4)",
-            }}>
-              {completedCount === 3
-                ? "오늘도 수고했어 ✨"
-                : completedCount === 2
-                ? "충분히 잘 버텼어 👏"
-                : "일단 내려온 것만으로도 충분해"}
+              우리는 늘 완벽하게 시작하지 못합니다.<br />
+              하지만 작은 행동 하나로 방향을 잡으면,<br />
+              <span style={{ color: "#6ee7e0" }}>망한 것 같던 하루도 조용히 착륙할 수 있어요.</span>
             </div>
           </div>
         </div>
