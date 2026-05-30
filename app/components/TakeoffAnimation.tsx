@@ -35,26 +35,26 @@ export default function TakeoffAnimation({ onDone }: { onDone: () => void }) {
   }, [phase]);
 
   const planeStyle: React.CSSProperties = phase >= 3 ? {
-    // 이륙: 오른쪽 위로 화면 이탈 — 크기 유지, 기수 위로
+    // 이륙: 왼쪽 위로 화면 이탈 (비행기 바라보는 방향)
     position: "absolute",
     bottom: "90%",
-    left: "120%",
+    left: "-20%",
     transform: "translateX(-50%) rotate(-22deg)",
     transition: "bottom 1.8s cubic-bezier(0.3,0,0.5,1), left 1.8s cubic-bezier(0.5,0,0.8,1), transform 0.5s ease-out",
     zIndex: 6,
   } : phase === 2 ? {
-    // 택싱: 왼쪽 → 오른쪽
+    // 택싱: 오른쪽 → 왼쪽 (비행기 바라보는 방향으로 이동)
     position: "absolute",
     bottom: "28.5%",
-    left: "68%",
+    left: "30%",
     transform: "translateX(-50%)",
     transition: "left 1.6s cubic-bezier(0.3,0,0.7,1)",
     zIndex: 6,
   } : {
-    // 대기: 왼쪽 끝 (화면 밖)
+    // 대기: 오른쪽 끝 (화면 밖)
     position: "absolute",
     bottom: "28.5%",
-    left: "10%",
+    left: "92%",
     transform: "translateX(-50%)",
     transition: "none",
     zIndex: 6,
