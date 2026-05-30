@@ -22,10 +22,9 @@ export default function LandingAnimation({ onDone, completedCount = 3 }: { onDon
     ];
     if (completedCount >= 2) {
       t.push(setTimeout(() => setPhase(4), 4400));
-      t.push(setTimeout(onDone, 6200));
+      t.push(setTimeout(onDone, 7700));  // 멘트 표시 후 1.5초 더 대기
     } else {
-      // count 1: 착지 후 잠깐 있다가 done
-      t.push(setTimeout(onDone, 5000));
+      t.push(setTimeout(onDone, 6500));
     }
     return () => t.forEach(clearTimeout);
   }, [onDone, completedCount]);
