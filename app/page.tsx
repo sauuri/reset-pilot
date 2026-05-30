@@ -9,6 +9,7 @@ import Onboarding from "./components/Onboarding";
 import { supabase } from "./utils/supabase";
 import { saveLogToSupabase } from "./utils/logs";
 import { playTap } from "./utils/sounds";
+import { hapticMedium } from "./utils/haptics";
 
 export default function Home() {
   const router = useRouter();
@@ -132,7 +133,7 @@ export default function Home() {
 
   async function handleSubmit() {
     if (!text.trim()) return;
-    playTap();
+    playTap(); hapticMedium();
     setLoading(true);
     setFlightStatus("flying");
     try {
