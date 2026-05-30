@@ -8,6 +8,7 @@ import TakeoffAnimation from "./components/TakeoffAnimation";
 import Onboarding from "./components/Onboarding";
 import { supabase } from "./utils/supabase";
 import { saveLogToSupabase } from "./utils/logs";
+import { playTap } from "./utils/sounds";
 
 export default function Home() {
   const router = useRouter();
@@ -131,6 +132,7 @@ export default function Home() {
 
   async function handleSubmit() {
     if (!text.trim()) return;
+    playTap();
     setLoading(true);
     setFlightStatus("flying");
     try {
