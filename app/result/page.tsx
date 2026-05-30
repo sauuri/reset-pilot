@@ -82,7 +82,7 @@ function fmt(s: number) {
   return `${m}:${sec}`;
 }
 
-interface TimerState { idx: number; total: number; remaining: number; done: boolean }
+interface TimerState { idx: number; total: number; remaining: number; done: boolean; startedAt: number; startedRemaining: number }
 
 function ResultContent() {
   const router = useRouter();
@@ -127,24 +127,40 @@ function ResultContent() {
     }
   }
 
-  // 타이머 카운트다운
+  // 타이머 카운트다운 — 화면 꺼짐/백그라운드 대응
   timerRef(() => {
     if (!timer || timer.done) return;
     if (timer.remaining <= 0) { setTimer(t => t ? { ...t, done: true } : null); return; }
+
+    // 포그라운드 복귀 시 실제 경과 시간으로 재계산
+    function handleVisibility() {
+      if (document.visibilityState === "visible") {
+        setTimer(t => {
+          if (!t || t.done) return t;
+          const elapsed = Math.floor((Date.now() - t.startedAt) / 1000);
+          const remaining = Math.max(0, t.startedRemaining - elapsed);
+          return remaining <= 0 ? { ...t, remaining: 0, done: true } : { ...t, remaining };
+        });
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+
     const id = setInterval(() => {
       setTimer(t => {
         if (!t || t.done) { clearInterval(id); return t; }
-        const next = t.remaining - 1;
-        if (next <= 0) { clearInterval(id); return { ...t, remaining: 0, done: true }; }
-        return { ...t, remaining: next };
+        const elapsed = Math.floor((Date.now() - t.startedAt) / 1000);
+        const remaining = Math.max(0, t.startedRemaining - elapsed);
+        if (remaining <= 0) { clearInterval(id); return { ...t, remaining: 0, done: true }; }
+        return { ...t, remaining };
       });
     }, 1000);
-    return () => clearInterval(id);
+
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", handleVisibility); };
   }, [timer?.idx, timer?.done]);
 
   function startTimer(i: number, duration: string) {
     const secs = parseDurationSecs(duration);
-    setTimer({ idx: i, total: secs, remaining: secs, done: false });
+    setTimer({ idx: i, total: secs, remaining: secs, done: false, startedAt: Date.now(), startedRemaining: secs });
   }
 
   function completeTimer() {
