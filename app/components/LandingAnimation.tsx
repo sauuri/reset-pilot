@@ -165,7 +165,7 @@ export default function LandingAnimation({ onDone, completedCount = 3 }: { onDon
             }}>
               우리는 늘 완벽하게 시작하지 못합니다.<br />
               하지만 작은 행동 하나로 방향을 잡으면,<br />
-              <span style={{ color: "#6ee7e0" }}>망한 것 같던 하루도 조용히 착륙할 수 있어요.</span>
+              <span style={{ color: "#6ee7e0" }}>망한 것 같던 하루도 잘 마무리 할 수 있어요.</span>
             </div>
           </div>
         </div>
