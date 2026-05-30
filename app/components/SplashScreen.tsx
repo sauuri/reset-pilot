@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getSkyMode, SKY_BG } from "../utils/skyTheme";
+import { playTap } from "../utils/sounds";
 
 export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
   const [phase, setPhase] = useState<"init" | "in" | "idle" | "out">("init");
@@ -14,6 +15,7 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
   }, []);
 
   function handleEnter() {
+    playTap();
     setPhase("out");
     setTimeout(onEnter, 550);
   }
