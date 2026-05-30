@@ -37,6 +37,7 @@
 
 html {
   background: #010810; /* notch/overscroll fallback — SkyBackground JS overrides per time */
+  overflow-x: hidden;
 }
 
 body {
@@ -44,6 +45,7 @@ body {
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
   padding-top: env(safe-area-inset-top, 44px);
+  overflow-x: hidden;
 }
 
 /* 격자 */

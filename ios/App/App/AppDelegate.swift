@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import WebKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,8 +8,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Disable WKWebView back/forward swipe gesture
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.disableWebViewSwipe(in: self.window?.rootViewController?.view)
+        }
         return true
+    }
+
+    private func disableWebViewSwipe(in view: UIView?) {
+        guard let view = view else { return }
+        for subview in view.subviews {
+            if let webView = subview as? WKWebView {
+                webView.allowsBackForwardNavigationGestures = false
+                webView.scrollView.bounces = false
+                webView.scrollView.alwaysBounceHorizontal = false
+                return
+            }
+            disableWebViewSwipe(in: subview)
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
