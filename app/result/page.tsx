@@ -89,8 +89,6 @@ interface TimerState { idx: number; total: number; remaining: number; done: bool
 
 function ResultContent() {
   const router = useRouter();
-  const { lang, toggle } = useLang();
-  const tr = t(lang);
   const searchParams = useSearchParams();
   const isDemo = searchParams.get("demo") === "true";
 
@@ -115,7 +113,7 @@ function ResultContent() {
     const total = log.length;
     const cur = getCurrentBadge(total);
     const prev = getCurrentBadge(total - 1);
-    if (cur && cur.count !== prev?.count) { setNewBadge({ emoji: cur.emoji, name: lang === "en" ? cur.nameEn : cur.name, desc: lang === "en" ? cur.descEn : cur.desc }); playBadge(); hapticSuccess(); }
+    if (cur && cur.count !== prev?.count) { setNewBadge(cur); playBadge(); hapticSuccess(); }
   }, [result, isDemo]);
 
   function toggleSave() {
@@ -309,7 +307,7 @@ function ResultContent() {
 
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 2, marginBottom: 8 }}>
-            {timer.done ? tr.timerComplete : tr.timerNowFlying}
+            {timer.done ? "MISSION COMPLETE" : "NOW FLYING"}
           </div>
           <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", fontWeight: 700, marginBottom: 4 }}>
             {result.actions[timer.idx].name}
