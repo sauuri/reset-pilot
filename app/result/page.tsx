@@ -140,8 +140,7 @@ function ResultContent() {
       if (document.visibilityState === "visible") {
         setTimer(t => {
           if (!t || t.done) return t;
-          const elapsed = Math.floor((Date.now() - t.startedAt) / 1000);
-          const remaining = Math.max(0, t.startedRemaining - elapsed);
+          const remaining = Math.max(0, Math.floor((t.startedAt + t.startedRemaining * 1000 - Date.now()) / 1000));
           if (remaining <= 0) { playTimerDone(); hapticSuccess(); }
           return remaining <= 0 ? { ...t, remaining: 0, done: true } : { ...t, remaining };
         });
@@ -152,12 +151,11 @@ function ResultContent() {
     const id = setInterval(() => {
       setTimer(t => {
         if (!t || t.done) { clearInterval(id); return t; }
-        const elapsed = Math.floor((Date.now() - t.startedAt) / 1000);
-        const remaining = Math.max(0, t.startedRemaining - elapsed);
+        const remaining = Math.max(0, Math.floor((t.startedAt + t.startedRemaining * 1000 - Date.now()) / 1000));
         if (remaining <= 0) { clearInterval(id); playTimerDone(); hapticSuccess(); return { ...t, remaining: 0, done: true }; }
         return { ...t, remaining };
       });
-    }, 1000);
+    }, 500);
 
     return () => { clearInterval(id); document.removeEventListener("visibilitychange", handleVisibility); };
   }, [timer?.idx, timer?.done]);
