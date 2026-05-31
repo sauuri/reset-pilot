@@ -115,6 +115,30 @@ export const translations = {
     onboardNext: "다음",
     onboardSkip: "건너뛰기",
 
+    // 로그인
+    loginCheckEmail: "메일을 확인해주세요",
+    loginSentTo: (email: string) => `${email}로 로그인 링크를 보냈어요.`,
+    loginDesc: "로그인하면 여러 기기에서\n복구 기록을 동기화할 수 있어요.",
+    loginEmailPlaceholder: "이메일 주소",
+    loginSending: "전송 중...",
+    loginGetLink: "로그인 링크 받기",
+    loginBack: "← 둘러보기로 돌아가기",
+
+    // 히스토리
+    historyModeLabels: { "Crash Mode": "긴급 착륙", "Drift Mode": "표류", "Launch Mode": "재이륙", "Recovery": "복구" } as Record<string, string>,
+    flightLog: "비행 일지",
+    insightsBtn: "📊 인사이트",
+    noFlightRecords: "아직 비행 기록이 없어요",
+    startFirstRecovery: "첫 복구 시작하기",
+    statTotalRecovery: "총 복구",
+    statStreakDays: "연속 일수",
+    statCompletedActions: "완료 행동",
+    nextBadgePrefix: "다음:",
+    filterAll: "전체",
+    filterWeek: "최근 7일",
+    filterMonth: "최근 30일",
+    noRecordsInPeriod: "이 기간엔 기록이 없어요",
+
     errorMsg: "오류가 발생했어요. 다시 시도해주세요.",
     quickTextTemplate: (energy: number, anxiety: number) =>
       `빠른 복구 요청. 에너지 ${energy}/10, 불안 ${anxiety}/10. 지금 당장 가능한 가장 작은 행동 3개를 주세요.`,
@@ -236,6 +260,28 @@ export const translations = {
     onboardStart: "Get Started",
     onboardNext: "Next",
     onboardSkip: "Skip",
+
+    loginCheckEmail: "Please check your email",
+    loginSentTo: (email: string) => `We sent a login link to ${email}.`,
+    loginDesc: "Log in to sync your recovery\nrecords across devices.",
+    loginEmailPlaceholder: "Email address",
+    loginSending: "Sending...",
+    loginGetLink: "Get login link",
+    loginBack: "← Back to browsing",
+
+    historyModeLabels: { "Crash Mode": "Emergency Landing", "Drift Mode": "Drift", "Launch Mode": "Re-Launch", "Recovery": "Recovery" } as Record<string, string>,
+    flightLog: "Flight Log",
+    insightsBtn: "📊 Insights",
+    noFlightRecords: "No flight records yet",
+    startFirstRecovery: "Start your first recovery",
+    statTotalRecovery: "Total recoveries",
+    statStreakDays: "Day streak",
+    statCompletedActions: "Actions done",
+    nextBadgePrefix: "Next:",
+    filterAll: "All",
+    filterWeek: "Last 7 days",
+    filterMonth: "Last 30 days",
+    noRecordsInPeriod: "No records in this period",
 
     errorMsg: "Something went wrong. Please try again.",
     quickTextTemplate: (energy: number, anxiety: number) =>
