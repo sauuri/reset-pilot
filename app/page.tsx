@@ -187,11 +187,11 @@ export default function Home() {
           <div style={{ padding: "20px" }}>
             <div style={{ marginBottom: 18 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: "#4e6e82", marginBottom: 8 }}>⚡ 에너지 {energy}/10</div>
-              <input type="range" min={1} max={10} value={energy} onChange={e => { const v = Number(e.target.value); if (v !== energy) hapticLight(); setEnergy(v); }} style={{ width: "100%", accentColor: "#1DB4A8" }} />
+              <input type="range" min={1} max={10} value={energy} onChange={e => { const v = Number(e.target.value); if (v !== energy) { (v === 1 || v === 10) ? hapticMedium() : hapticLight(); } setEnergy(v); }} style={{ width: "100%", accentColor: "#1DB4A8" }} />
             </div>
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: "#4e6e82", marginBottom: 8 }}>😰 불안/스트레스 {anxiety}/10</div>
-              <input type="range" min={1} max={10} value={anxiety} onChange={e => { const v = Number(e.target.value); if (v !== anxiety) hapticLight(); setAnxiety(v); }} style={{ width: "100%", accentColor: "#E53935" }} />
+              <input type="range" min={1} max={10} value={anxiety} onChange={e => { const v = Number(e.target.value); if (v !== anxiety) { (v === 1 || v === 10) ? hapticMedium() : hapticLight(); } setAnxiety(v); }} style={{ width: "100%", accentColor: "#E53935" }} />
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={() => setQuickMode(false)} style={{ flex: 1, padding: "12px", borderRadius: 10, border: "1.5px solid rgba(165,210,238,0.5)", background: "transparent", color: "#7facca", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>취소</button>
@@ -322,7 +322,7 @@ export default function Home() {
                   <span className="gauge" style={{ fontSize: 22, fontWeight: 900, color: "#FF6B35" }}>{energy}</span>
                   <span style={{ fontSize: 11, color: "#9ab8cc" }}>/10</span>
                 </div>
-                <input type="range" min={1} max={10} value={energy} onChange={(e) => { const v = Number(e.target.value); if (v !== energy) hapticLight(); setEnergy(v); }} className="slider" />
+                <input type="range" min={1} max={10} value={energy} onChange={(e) => { const v = Number(e.target.value); if (v !== energy) { (v === 1 || v === 10) ? hapticMedium() : hapticLight(); } setEnergy(v); }} className="slider" />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
                   <span style={{ fontSize: 10, color: "#9ab8cc" }}>방전</span>
                   <span style={{ fontSize: 10, color: "#9ab8cc" }}>충전</span>
@@ -334,7 +334,7 @@ export default function Home() {
                   <span className="gauge" style={{ fontSize: 22, fontWeight: 900, color: "#E53935" }}>{anxiety}</span>
                   <span style={{ fontSize: 11, color: "#9ab8cc" }}>/10</span>
                 </div>
-                <input type="range" min={1} max={10} value={anxiety} onChange={(e) => { const v = Number(e.target.value); if (v !== anxiety) hapticLight(); setAnxiety(v); }} className="slider" />
+                <input type="range" min={1} max={10} value={anxiety} onChange={(e) => { const v = Number(e.target.value); if (v !== anxiety) { (v === 1 || v === 10) ? hapticMedium() : hapticLight(); } setAnxiety(v); }} className="slider" />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
                   <span style={{ fontSize: 10, color: "#9ab8cc" }}>괜찮음</span>
                   <span style={{ fontSize: 10, color: "#9ab8cc" }}>폭발직전</span>
