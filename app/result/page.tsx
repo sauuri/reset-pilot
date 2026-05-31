@@ -164,8 +164,7 @@ function ResultContent() {
 
   function startTimer(i: number, duration: string) {
     const secs = parseDurationSecs(duration);
-    const endTime = Date.now() + secs * 1000;
-    bridgeSetTimer(endTime, result?.actions[i]?.title ?? "");
+    bridgeSetTimer(secs, result?.actions[i]?.title ?? "");
     setTimer({ idx: i, total: secs, remaining: secs, done: false, startedAt: Date.now(), startedRemaining: secs });
   }
 
