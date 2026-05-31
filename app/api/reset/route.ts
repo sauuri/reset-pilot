@@ -23,12 +23,80 @@ function buildPersonalizationBlock(p: Personalization): string {
 → 완료율 높은 유형을 우선 고려하되, 위 행동은 피하고 새로운 행동을 제안하세요.`;
 }
 
+function buildPersonalizationBlockEn(p: Personalization): string {
+  const rates = p.completionRates;
+  const sorted = (["Body Reset", "Space Reset", "Life Reset"] as Array<keyof typeof rates>)
+    .slice()
+    .sort((a, b) => rates[b] - rates[a]);
+  const preferred = sorted.filter(k => rates[k] >= 50).join(", ") || "none";
+  const difficult = sorted.filter(k => rates[k] < 30).join(", ") || "none";
+  const recent = p.recentActions.length > 0 ? p.recentActions.join(", ") : "none";
+  return `
+User's past patterns (personalization):
+- High-completion types (preferred): ${preferred}
+- Low-completion types (struggles with): ${difficult}
+- Recently suggested actions (do not repeat): ${recent}
+→ Prioritize high-completion types, but avoid the above actions and suggest new ones.`;
+}
+
 export async function POST(request: Request) {
-  const { text, energy, anxiety, timeLeft, personalization } = await request.json();
+  const { text, energy, anxiety, timeLeft, personalization, lang = "ko" } = await request.json();
+  const isEn = lang === "en";
 
-  const personalizationBlock = personalization ? buildPersonalizationBlock(personalization as Personalization) : "";
+  const personalizationBlock = personalization
+    ? (isEn ? buildPersonalizationBlockEn(personalization as Personalization) : buildPersonalizationBlock(personalization as Personalization))
+    : "";
 
-  const prompt = `너는 ResetPilot, AI 하루 복구 관제사다.
+  const promptEn = `You are ResetPilot, an AI "day recovery" flight controller.
+Analyze the user's day and create not "productivity advice" but the "minimum recovery route to avoid ending today at zero."
+
+Rules:
+1. Never blame the user
+2. Don't give a perfect plan
+3. If energy is low, make actions very small
+4. Always separate emotional statements from factual statements
+5. The goal is not 100 points — it's avoiding zero
+6. Return JSON only (no markdown code blocks)
+7. Write ALL text fields in natural English
+
+User state:
+- Today's situation: ${text}
+- Energy: ${energy}/10
+- Anxiety/stress: ${anxiety}/10
+- Time left: ${timeLeft}
+${personalizationBlock}
+
+Mode criteria:
+- Crash Mode: low energy, high anxiety, completely fallen apart
+- Drift Mode: dazed and scattered, not fully wrecked
+- Launch Mode: has energy but no direction
+
+JSON format:
+{
+  "mode": "Crash Mode | Drift Mode | Launch Mode",
+  "modeDesc": "one-line mode description (e.g., Today, recovery comes before productivity)",
+  "ruinScore": (how wrecked, 0-100),
+  "scoreBefore": (current day score 0-100),
+  "scoreAfter": (expected score after recovery 0-100, must be higher than scoreBefore),
+  "emotionFact": {
+    "emotion": "the exaggerated emotion the user feels",
+    "fact": "a statement with only the actual facts (emotion removed)",
+    "interpret": "one-line fact-based interpretation"
+  },
+  "recoveryGoal": "one-line landing goal for today",
+  "actions": [
+    { "name": "Body Reset | Space Reset | Life Reset", "title": "action title", "duration": "time needed", "reason": "why it helps" },
+    { "name": "Body Reset | Space Reset | Life Reset", "title": "action title", "duration": "time needed", "reason": "why it helps" },
+    { "name": "Body Reset | Space Reset | Life Reset", "title": "action title", "duration": "time needed", "reason": "why it helps" }
+  ],
+  "skip": ["thing to drop today 1", "thing to drop today 2", "thing to drop today 3"],
+  "successCriteria": "one-sentence success criterion for today (warm and realistic)",
+  "message": "one-line comforting message (playful and empathetic)"
+}
+
+Make actions realistic for the time left (${timeLeft}) and energy (${energy}/10).`;
+
+  const prompt = isEn ? promptEn : `너는 ResetPilot, AI 하루 복구 관제사다.
 사용자의 하루 상태를 분석해서 "생산성 조언"이 아니라 "오늘을 0점으로 끝내지 않기 위한 최소 복구 루트"를 만들어라.
 
 규칙:
@@ -97,7 +165,7 @@ JSON 형식:
   } catch (err) {
     console.error("Reset API error:", err);
     return Response.json(
-      { error: "AI 응답 생성에 실패했습니다. 잠시 후 다시 시도해주세요." },
+      { error: "Failed to generate AI response. Please try again shortly." },
       {
         status: 500,
         headers: {
