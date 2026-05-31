@@ -6,14 +6,9 @@ const TimerBridge = registerPlugin<{
 }>("TimerBridge");
 
 export function bridgeSetTimer(endTime: number, label: string) {
-  TimerBridge.setTimer({ endTime, label })
-    .then((result) => {
-      alert(`[LiveActivity] ${JSON.stringify(result)}`);
-    })
-    .catch((e) => {
-      console.error("[TimerBridge] setTimer error:", e);
-      alert(`[TimerBridge] error: ${e}`);
-    });
+  TimerBridge.setTimer({ endTime, label }).catch((e) => {
+    console.error("[TimerBridge] setTimer error:", e);
+  });
 }
 
 export function bridgeClearTimer() {
