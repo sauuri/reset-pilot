@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import SkyBackground from "./components/SkyBackground";
 import ScrollReset from "./components/ScrollReset";
+import { LangProvider } from "./utils/LangContext";
 
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
@@ -32,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col">
         <ScrollReset />
         <SkyBackground />
-        {children}
+        <LangProvider>{children}</LangProvider>
       </body>
     </html>
   );

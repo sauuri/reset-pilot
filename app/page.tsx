@@ -10,9 +10,13 @@ import { supabase } from "./utils/supabase";
 import { saveLogToSupabase } from "./utils/logs";
 import { playTap } from "./utils/sounds";
 import { hapticLight, hapticMedium } from "./utils/haptics";
+import { useLang } from "./utils/LangContext";
+import { t } from "./utils/i18n";
 
 export default function Home() {
   const router = useRouter();
+  const { lang, toggle } = useLang();
+  const tr = t(lang);
   const [showSplash, setShowSplash] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -35,7 +39,8 @@ export default function Home() {
   }
   const [energy, setEnergy] = useState(5);
   const [anxiety, setAnxiety] = useState(5);
-  const [timeLeft, setTimeLeft] = useState("2시간");
+  const [timeIdx, setTimeIdx] = useState(1);
+  const timeLeft = tr.timeOptions[timeIdx];
   const [loading, setLoading] = useState(false);
   const [flightStatus, setFlightStatus] = useState<"ready" | "flying" | "arrived">("ready");
   const [streak, setStreak] = useState(0);
@@ -100,12 +105,12 @@ export default function Home() {
     setFlightStatus("flying");
     try {
       const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
-      const quickText = `빠른 복구 요청. 에너지 ${energy}/10, 불안 ${anxiety}/10. 지금 당장 가능한 가장 작은 행동 3개를 주세요.`;
+      const quickText = tr.quickTextTemplate(energy, anxiety);
       const personalization = buildPersonalization();
       const res = await fetch(`${apiBase}/api/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: quickText, energy, anxiety, timeLeft: "30분", personalization }),
+        body: JSON.stringify({ text: quickText, energy, anxiety, timeLeft: "30분", personalization, lang }),
       });
       const data = await res.json();
       const ts = Date.now();
@@ -124,7 +129,7 @@ export default function Home() {
       });
       setFlightStatus("arrived");
     } catch {
-      alert("오류가 발생했어요. 다시 시도해주세요.");
+      alert(tr.errorMsg);
       setFlightStatus("ready");
     } finally {
       setLoading(false);
@@ -142,7 +147,7 @@ export default function Home() {
       const res = await fetch(`${apiBase}/api/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, energy, anxiety, timeLeft, personalization }),
+        body: JSON.stringify({ text, energy, anxiety, timeLeft, personalization, lang }),
       });
       const data = await res.json();
       const ts = Date.now();
@@ -161,7 +166,7 @@ export default function Home() {
       });
       setFlightStatus("arrived");
     } catch {
-      alert("오류가 발생했어요. 다시 시도해주세요.");
+      alert(tr.errorMsg);
       setFlightStatus("ready");
     } finally {
       setLoading(false);
@@ -180,22 +185,22 @@ export default function Home() {
       <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(1,8,16,0.85)", backdropFilter: "blur(8px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
         <div style={{ width: "100%", maxWidth: 400, background: "rgba(255,255,255,0.95)", borderRadius: 20, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <div style={{ background: "linear-gradient(135deg, #0A2463, #163678)", padding: "18px 20px" }}>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", letterSpacing: 2, marginBottom: 4 }}>QUICK RECOVERY</div>
-            <div style={{ fontSize: 18, fontWeight: 900, color: "white" }}>⚡ 30초 복구</div>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", marginTop: 4 }}>지금 상태만 알려주면 바로 플랜 드릴게요.</div>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", letterSpacing: 2, marginBottom: 4 }}>{tr.quickRecovery}</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: "white" }}>{tr.quickHeading}</div>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", marginTop: 4 }}>{tr.quickSub}</div>
           </div>
           <div style={{ padding: "20px" }}>
             <div style={{ marginBottom: 18 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#4e6e82", marginBottom: 8 }}>⚡ 에너지 {energy}/10</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#4e6e82", marginBottom: 8 }}>{tr.quickEnergy} {energy}/10</div>
               <input type="range" min={1} max={10} value={energy} onChange={e => { const v = Number(e.target.value); if (v !== energy) { (v === 1 || v === 10) ? hapticMedium() : hapticLight(); } setEnergy(v); }} style={{ width: "100%", accentColor: "#1DB4A8" }} />
             </div>
             <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#4e6e82", marginBottom: 8 }}>😰 불안/스트레스 {anxiety}/10</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#4e6e82", marginBottom: 8 }}>{tr.quickStress} {anxiety}/10</div>
               <input type="range" min={1} max={10} value={anxiety} onChange={e => { const v = Number(e.target.value); if (v !== anxiety) { (v === 1 || v === 10) ? hapticMedium() : hapticLight(); } setAnxiety(v); }} style={{ width: "100%", accentColor: "#E53935" }} />
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => setQuickMode(false)} style={{ flex: 1, padding: "12px", borderRadius: 10, border: "1.5px solid rgba(165,210,238,0.5)", background: "transparent", color: "#7facca", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>취소</button>
-              <button onClick={() => { setQuickMode(false); handleQuickSubmit(); }} style={{ flex: 2, padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg, #0A2463, #163678)", color: "white", fontSize: 14, fontWeight: 900, cursor: "pointer" }}>⚡ 바로 복구 시작</button>
+              <button onClick={() => setQuickMode(false)} style={{ flex: 1, padding: "12px", borderRadius: 10, border: "1.5px solid rgba(165,210,238,0.5)", background: "transparent", color: "#7facca", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>{tr.cancel}</button>
+              <button onClick={() => { setQuickMode(false); handleQuickSubmit(); }} style={{ flex: 2, padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg, #0A2463, #163678)", color: "white", fontSize: 14, fontWeight: 900, cursor: "pointer" }}>{tr.quickStart}</button>
             </div>
           </div>
         </div>
@@ -220,19 +225,19 @@ export default function Home() {
                 animation: flightStatus === "flying" ? "blink 1.5s infinite" : "none",
                 transition: "background 0.3s",
               }} />
-              {flightStatus === "ready" && "준비 중"}
-              {flightStatus === "flying" && "운항 중"}
-              {flightStatus === "arrived" && "도착 ✓"}
+              {flightStatus === "ready" && tr.statusReady}
+              {flightStatus === "flying" && tr.statusFlying}
+              {flightStatus === "arrived" && tr.statusArrived}
             </span>
           </div>
           <h1 style={{ fontSize: 20, fontWeight: 900, lineHeight: 1.35, color: "white", margin: 0, textShadow: "0 2px 10px rgba(10,36,99,0.25)" }}>
-            오늘 망한 것 같아도<br />
-            <span style={{ color: "#FFE066", whiteSpace: "nowrap" }}>딱 하나만 다시 시작해봐요.</span>
+            {tr.heroLine1}<br />
+            <span style={{ color: "#FFE066", whiteSpace: "nowrap" }}>{tr.heroLine2}</span>
           </h1>
           {streak >= 2 && (
             <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,160,0,0.18)", border: "1px solid rgba(255,160,0,0.35)", borderRadius: 20, padding: "3px 10px", whiteSpace: "nowrap" }}>
               <span style={{ fontSize: 13, lineHeight: 1 }}>🔥</span>
-              <span style={{ fontSize: 11, fontWeight: 800, color: "#FFB830" }}>{streak}일 연속 복구 중</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: "#FFB830" }}>{streak}{tr.streakSuffix}</span>
             </div>
           )}
         </div>
@@ -240,16 +245,17 @@ export default function Home() {
           {/* 1행: 로그인/아웃 */}
           {user ? (
             <button onClick={async () => { await supabase.auth.signOut(); setUser(null); }} style={{ background: "rgba(255,255,255,0.1)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.55)", borderRadius: 9, padding: "5px 8px", fontSize: 10, fontWeight: 700, cursor: "pointer", textAlign: "center" }}>
-              로그아웃
+              {tr.logout}
             </button>
           ) : user === null ? (
             <button onClick={() => router.push("/login")} style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)", color: "white", borderRadius: 9, padding: "5px 8px", fontSize: 10, fontWeight: 700, cursor: "pointer", textAlign: "center" }}>
-              로그인
+              {tr.login}
             </button>
           ) : null}
-          {/* 2행: ⚡ 📋 🔔 */}
+          {/* 2행: 🌐 ⚡ 📋 🔔 */}
           <div style={{ display: "flex", gap: 5 }}>
-            <button onClick={() => setQuickMode(true)} style={{ background: "rgba(255,200,0,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,200,0,0.35)", color: "#FFE066", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", fontWeight: 900, lineHeight: 1 }} title="30초 빠른 복구">⚡</button>
+            <button onClick={toggle} style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)", color: "white", borderRadius: 9, padding: "6px 8px", fontSize: 11, cursor: "pointer", fontWeight: 800, lineHeight: 1 }}>{lang === "ko" ? "EN" : "한"}</button>
+            <button onClick={() => setQuickMode(true)} style={{ background: "rgba(255,200,0,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,200,0,0.35)", color: "#FFE066", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", fontWeight: 900, lineHeight: 1 }}>⚡</button>
             <button onClick={() => router.push("/history")} style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)", color: "white", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", lineHeight: 1 }}>📋</button>
             <button onClick={() => router.push("/notifications")} style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", color: "white", borderRadius: 9, padding: "6px 9px", fontSize: 15, cursor: "pointer", lineHeight: 1 }}>🔔</button>
           </div>
@@ -264,7 +270,7 @@ export default function Home() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <div style={{ fontSize: 9, letterSpacing: 2, color: "rgba(255,255,255,0.4)", marginBottom: 3 }}>TODAY&apos;S BOARDING PASS</div>
-              <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: 0.5, color: "white" }}>복구 플랜 만들기</div>
+              <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: 0.5, color: "white" }}>{tr.planTitle}</div>
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginBottom: 2 }}>FLIGHT</div>
@@ -279,17 +285,10 @@ export default function Home() {
 
             {/* 상태 입력 */}
             <div>
-              <div className="ticket-label">현재 상태 — 오늘 어떤 하루였어?</div>
+              <div className="ticket-label">{tr.statusInputLabel}</div>
               {/* 상황 빠른선택 */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 5, margin: "6px 0" }}>
-                {[
-                  { emoji: "💀", tag: "완전 번아웃",   text: "오늘 완전 번아웃이야. 아무것도 하기 싫고 머리도 멍해. 그냥 다 놔버리고 싶어." },
-                  { emoji: "😴", tag: "늦잠·무기력",   text: "늦게 일어나서 하루 망친 것 같아. 무기력하고 아무 의욕이 없어." },
-                  { emoji: "😰", tag: "불안·걱정",      text: "불안하고 걱정이 너무 많아. 해야 할 게 쌓여있는데 시작을 못 하겠어." },
-                  { emoji: "📱", tag: "폰만 보다가",    text: "하루종일 폰만 봤어. 유튜브, SNS 돌리다 시간 다 갔어. 해야 할 게 있는데 못 했어." },
-                  { emoji: "📚", tag: "공부 못한 날",   text: "오늘 공부를 거의 못 했어. 집중이 안 되고 자꾸 딴짓만 했어." },
-                  { emoji: "🏠", tag: "방이 엉망",      text: "방이 너무 지저분한데 치울 의욕이 없어. 어디서부터 시작해야 할지 모르겠어." },
-                ].map(({ emoji, tag, text: tpl }) => (
+                {tr.situations.map(({ emoji, tag, text: tpl }) => (
                   <button
                     key={tag}
                     onClick={() => setText(tpl)}
@@ -308,7 +307,7 @@ export default function Home() {
               </div>
               <textarea
                 rows={2}
-                placeholder="또는 직접 입력: 오늘 늦게 일어났고 방이 지저분해."
+                placeholder={tr.placeholder}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
               />
@@ -317,43 +316,43 @@ export default function Home() {
             {/* 에너지 + 불안 */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
-                <div className="ticket-label">에너지 잔량</div>
+                <div className="ticket-label">{tr.energyLabel}</div>
                 <div style={{ marginTop: 2, marginBottom: 4 }}>
                   <span className="gauge" style={{ fontSize: 22, fontWeight: 900, color: "#FF6B35" }}>{energy}</span>
                   <span style={{ fontSize: 11, color: "#9ab8cc" }}>/10</span>
                 </div>
                 <input type="range" min={1} max={10} value={energy} onChange={(e) => { const v = Number(e.target.value); if (v !== energy) { (v === 1 || v === 10) ? hapticMedium() : hapticLight(); } setEnergy(v); }} className="slider" />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
-                  <span style={{ fontSize: 10, color: "#9ab8cc" }}>방전</span>
-                  <span style={{ fontSize: 10, color: "#9ab8cc" }}>충전</span>
+                  <span style={{ fontSize: 10, color: "#9ab8cc" }}>{tr.energyLow}</span>
+                  <span style={{ fontSize: 10, color: "#9ab8cc" }}>{tr.energyHigh}</span>
                 </div>
               </div>
               <div>
-                <div className="ticket-label">스트레스 강도</div>
+                <div className="ticket-label">{tr.stressLabel}</div>
                 <div style={{ marginTop: 2, marginBottom: 4 }}>
                   <span className="gauge" style={{ fontSize: 22, fontWeight: 900, color: "#E53935" }}>{anxiety}</span>
                   <span style={{ fontSize: 11, color: "#9ab8cc" }}>/10</span>
                 </div>
                 <input type="range" min={1} max={10} value={anxiety} onChange={(e) => { const v = Number(e.target.value); if (v !== anxiety) { (v === 1 || v === 10) ? hapticMedium() : hapticLight(); } setAnxiety(v); }} className="slider" />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
-                  <span style={{ fontSize: 10, color: "#9ab8cc" }}>괜찮음</span>
-                  <span style={{ fontSize: 10, color: "#9ab8cc" }}>폭발직전</span>
+                  <span style={{ fontSize: 10, color: "#9ab8cc" }}>{tr.stressLow}</span>
+                  <span style={{ fontSize: 10, color: "#9ab8cc" }}>{tr.stressHigh}</span>
                 </div>
               </div>
             </div>
 
             {/* 남은 시간 */}
             <div>
-              <div className="ticket-label">오늘 쓸 수 있는 시간</div>
+              <div className="ticket-label">{tr.timeLabel}</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 5, marginTop: 4 }}>
-                {["1시간 미만", "2시간", "3시간 이상", "종일"].map((t) => (
-                  <button key={t} onClick={() => setTimeLeft(t)} style={{
+                {tr.timeOptions.map((t, idx) => (
+                  <button key={idx} onClick={() => setTimeIdx(idx)} style={{
                     padding: "9px 4px",
                     borderRadius: 8,
                     border: "1.5px solid",
-                    borderColor: timeLeft === t ? "#0A2463" : "rgba(165,210,238,0.5)",
-                    background: timeLeft === t ? "#0A2463" : "rgba(255,255,255,0.4)",
-                    color: timeLeft === t ? "white" : "#4e6e82",
+                    borderColor: timeIdx === idx ? "#0A2463" : "rgba(165,210,238,0.5)",
+                    background: timeIdx === idx ? "#0A2463" : "rgba(255,255,255,0.4)",
+                    color: timeIdx === idx ? "white" : "#4e6e82",
                     fontSize: 11, fontWeight: 700, cursor: "pointer", transition: "all 0.15s",
                   }}>
                     {t}
@@ -381,7 +380,7 @@ export default function Home() {
             <div>
               <div className="ticket-label">STATUS</div>
               <div style={{ fontSize: 13, fontWeight: 800, color: text.trim() ? "#1DB4A8" : "#9ab8cc" }}>
-                {text.trim() ? "READY ✓" : "PENDING"}
+                {text.trim() ? tr.statusReadyShort : tr.statusPending}
               </div>
             </div>
           </div>
@@ -396,17 +395,17 @@ export default function Home() {
         disabled={loading || !text.trim()}
         style={{ marginTop: 28 }}
       >
-        {loading ? "🛰️ 플랜 생성 중..." : "✈️ 지금 할 일 3개 받기"}
+        {loading ? tr.submitLoading : tr.submitBtn}
       </button>
 
       {/* 위기 상담 */}
       <div style={{ marginTop: 28, textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.38)", lineHeight: 1.9 }}>
-        혼자 감당하기 너무 힘들다면
+        {tr.crisisText}
         <div style={{ marginTop: 4, display: "flex", justifyContent: "center", gap: 16 }}>
-          <a href="tel:1393" style={{ color: "rgba(255,255,255,0.6)", fontWeight: 700, textDecoration: "none" }}>자살예방상담전화 1393</a>
-          <a href="tel:15770199" style={{ color: "rgba(255,255,255,0.6)", fontWeight: 700, textDecoration: "none" }}>정신건강위기 1577-0199</a>
+          <a href="tel:1393" style={{ color: "rgba(255,255,255,0.6)", fontWeight: 700, textDecoration: "none" }}>{tr.crisis1}</a>
+          <a href="tel:15770199" style={{ color: "rgba(255,255,255,0.6)", fontWeight: 700, textDecoration: "none" }}>{tr.crisis2}</a>
         </div>
-        <div style={{ fontSize: 11, marginTop: 3, color: "rgba(255,255,255,0.25)" }}>24시간 · 무료 · 익명</div>
+        <div style={{ fontSize: 11, marginTop: 3, color: "rgba(255,255,255,0.25)" }}>{tr.crisisNote}</div>
       </div>
 
     </main>
