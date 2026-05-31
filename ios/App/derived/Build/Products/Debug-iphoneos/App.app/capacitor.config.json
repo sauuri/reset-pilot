@@ -1,0 +1,21 @@
+{
+	"appId": "com.sauuri.resetpilot",
+	"appName": "Reset Pilot",
+	"webDir": "out",
+	"server": {
+		"url": "https://reset-pilot.vercel.app",
+		"allowNavigation": [
+			"*.apple.com",
+			"appleid.apple.com",
+			"*.supabase.co"
+		]
+	},
+	"ios": {
+		"contentInset": "never"
+	},
+	"packageClassList": [
+		"CAPBrowserPlugin",
+		"HapticsPlugin",
+		"LocalNotificationsPlugin"
+	]
+}

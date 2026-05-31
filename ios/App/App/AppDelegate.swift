@@ -1,5 +1,7 @@
+import ActivityKit
 import UIKit
 import Capacitor
+import TimerShared
 import WebKit
 
 @UIApplicationMain
@@ -43,11 +45,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        if #available(iOS 16.2, *) {
+            Task {
+                for activity in Activity<TimerActivityAttributes>.activities {
+                    if activity.content.state.endTime <= Date() {
+                        await activity.end(nil, dismissalPolicy: .immediate)
+                    }
+                }
+            }
+        }
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+        guard #available(iOS 16.2, *) else { return }
+        let activities = Array(Activity<TimerActivityAttributes>.activities)
+        guard !activities.isEmpty else { return }
+        let sema = DispatchSemaphore(value: 0)
+        Task.detached {
+            for activity in activities {
+                await activity.end(nil, dismissalPolicy: .immediate)
+            }
+            sema.signal()
+        }
+        sema.wait(timeout: .now() + 2)
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
