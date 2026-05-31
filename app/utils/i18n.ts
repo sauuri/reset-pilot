@@ -106,6 +106,15 @@ export const translations = {
     landingTitle: "무사히 착륙했어요 🛬",
     landingSub: "오늘의 복구 완료",
 
+    onboardingSlides: [
+      { icon: "✈️", title: "망한 하루도 복구할 수 있어요", desc: "Reset Pilot은 오늘 무너진 당신을 위한\nAI 하루 복구 관제탑이에요." },
+      { icon: "🎯", title: "딱 3가지만 다시 시작해요", desc: "완벽한 하루 말고, 0점을 면하는\n가장 작은 행동 3개를 제안해요." },
+      { icon: "🛬", title: "매일 다시 이륙하면 돼요", desc: "복구 기록이 쌓이면 나만의\n비행 일지가 완성돼요." },
+    ] as { icon: string; title: string; desc: string }[],
+    onboardStart: "시작하기",
+    onboardNext: "다음",
+    onboardSkip: "건너뛰기",
+
     errorMsg: "오류가 발생했어요. 다시 시도해주세요.",
     quickTextTemplate: (energy: number, anxiety: number) =>
       `빠른 복구 요청. 에너지 ${energy}/10, 불안 ${anxiety}/10. 지금 당장 가능한 가장 작은 행동 3개를 주세요.`,
@@ -218,6 +227,15 @@ export const translations = {
     takeoffText: "Taking off ✈️",
     landingTitle: "Landed safely 🛬",
     landingSub: "Today's recovery complete",
+
+    onboardingSlides: [
+      { icon: "✈️", title: "Even a wrecked day can recover", desc: "Reset Pilot is your AI day-recovery\ncontrol tower for when today falls apart." },
+      { icon: "🎯", title: "Just restart 3 things", desc: "Not a perfect day — we suggest the 3\nsmallest actions to avoid scoring zero." },
+      { icon: "🛬", title: "Just take off again each day", desc: "As recovery records stack up, your own\nflight log comes together." },
+    ] as { icon: string; title: string; desc: string }[],
+    onboardStart: "Get Started",
+    onboardNext: "Next",
+    onboardSkip: "Skip",
 
     errorMsg: "Something went wrong. Please try again.",
     quickTextTemplate: (energy: number, anxiety: number) =>
