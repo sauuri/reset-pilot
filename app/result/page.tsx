@@ -7,6 +7,7 @@ import { updateLogInSupabase } from "../utils/logs";
 import { getCurrentBadge, getNextBadge } from "../utils/badges";
 import { playCheck, playTimerDone, playBadge, playPop, playChime, playTap } from "../utils/sounds";
 import { hapticLight, hapticMedium, hapticHeavy, hapticSuccess } from "../utils/haptics";
+import { bridgeSetTimer, bridgeClearTimer } from "../utils/timerBridge";
 
 interface Action {
   name: string;
@@ -163,12 +164,15 @@ function ResultContent() {
 
   function startTimer(i: number, duration: string) {
     const secs = parseDurationSecs(duration);
+    const endTime = Date.now() + secs * 1000;
+    bridgeSetTimer(endTime, result?.actions[i]?.title ?? "");
     setTimer({ idx: i, total: secs, remaining: secs, done: false, startedAt: Date.now(), startedRemaining: secs });
   }
 
   function completeTimer() {
     if (!timer) return;
     const next = [...checked]; next[timer.idx] = true; setChecked(next);
+    bridgeClearTimer();
     setTimer(null);
   }
 
@@ -358,7 +362,7 @@ function ResultContent() {
             }}>
               ✅ 완료했어요!
             </button>
-            <button onClick={() => setTimer(null)} style={{
+            <button onClick={() => { bridgeClearTimer(); setTimer(null); }} style={{
               padding: "14px", borderRadius: 14, cursor: "pointer",
               background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)",
               color: "rgba(255,255,255,0.7)", fontSize: 14, fontWeight: 700,
@@ -376,7 +380,7 @@ function ResultContent() {
             }}>
               ✅ 벌써 완료했어요!
             </button>
-            <button onClick={() => setTimer(null)} style={{
+            <button onClick={() => { bridgeClearTimer(); setTimer(null); }} style={{
               padding: "14px", borderRadius: 14, cursor: "pointer",
               background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)",
               color: "rgba(255,255,255,0.6)", fontSize: 13, fontWeight: 700,
