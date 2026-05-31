@@ -98,6 +98,14 @@ export const translations = {
     shareRecordText: (ruin: number, lines: string, done: number, mood: string) =>
       `✈️ Reset Pilot — 오늘 복구 기록\n${"─".repeat(22)}\n부담도 ${ruin}% → 흐름 되찾는 중\n\n${lines}\n${done > 0 ? `\n완료 ${done}/3 🎯` : ""}${mood ? `\n${mood}` : ""}\n\n#ResetPilot #망한하루복구`,
 
+    // 애니메이션 / 스플래시
+    flightLoadingMsgs: ["기체 점검 중...", "활주로 진입...", "관제탑 교신 중...", "이륙 준비 완료...", "최적 항로 계산 중..."],
+    splashTagline: "오늘 하루, 다시 이륙",
+    splashTap: "탭하여 시작 →",
+    takeoffText: "이륙합니다 ✈️",
+    landingTitle: "무사히 착륙했어요 🛬",
+    landingSub: "오늘의 복구 완료",
+
     errorMsg: "오류가 발생했어요. 다시 시도해주세요.",
     quickTextTemplate: (energy: number, anxiety: number) =>
       `빠른 복구 요청. 에너지 ${energy}/10, 불안 ${anxiety}/10. 지금 당장 가능한 가장 작은 행동 3개를 주세요.`,
@@ -203,6 +211,13 @@ export const translations = {
     shareMoodWorse: "😔 Still hard",
     shareRecordText: (ruin: number, lines: string, done: number, mood: string) =>
       `✈️ Reset Pilot — Today's recovery log\n${"─".repeat(22)}\nBurden ${ruin}% → finding the flow again\n\n${lines}\n${done > 0 ? `\nDone ${done}/3 🎯` : ""}${mood ? `\n${mood}` : ""}\n\n#ResetPilot #DayRecovery`,
+
+    flightLoadingMsgs: ["Checking aircraft...", "Entering runway...", "Contacting control tower...", "Ready for takeoff...", "Calculating best route..."],
+    splashTagline: "Take off into today, again",
+    splashTap: "Tap to start →",
+    takeoffText: "Taking off ✈️",
+    landingTitle: "Landed safely 🛬",
+    landingSub: "Today's recovery complete",
 
     errorMsg: "Something went wrong. Please try again.",
     quickTextTemplate: (energy: number, anxiety: number) =>
