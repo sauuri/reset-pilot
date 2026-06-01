@@ -209,6 +209,9 @@ export const translations = {
     quickTextTemplate: (energy: number, anxiety: number) =>
       `빠른 복구 요청. 에너지 ${energy}/10, 불안 ${anxiety}/10. 지금 당장 가능한 가장 작은 행동 3개를 주세요.`,
 
+    landingMsg1: "우리는 늘 완벽하게 시작하지 못합니다.",
+    landingMsg2: "하지만 작은 행동 하나로 방향을 잡으면,",
+    landingMsg3: "망한 것 같던 하루도 잘 마무리 할 수 있어요.",
     historyPageTitle: "📋 복구 기록",
     historySelect: "선택",
     historySelectCancel: "취소",
@@ -451,6 +454,9 @@ export const translations = {
     quickTextTemplate: (energy: number, anxiety: number) =>
       `Quick recovery request. Energy ${energy}/10, anxiety ${anxiety}/10. Give me the 3 smallest actions I can do right now.`,
 
+    landingMsg1: "We never start perfectly.",
+    landingMsg2: "But one small action can set the direction —",
+    landingMsg3: "even a day that seemed ruined can end well.",
     historyPageTitle: "📋 Recovery Records",
     historySelect: "Select",
     historySelectCancel: "Cancel",

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { getSkyMode, SKY_BG, RUNWAY_BG } from "../utils/skyTheme";
 import { playLanding, playBadge } from "../utils/sounds";
+import { useLang } from "../utils/LangContext";
+import { t } from "../utils/i18n";
 
 const STARS: [number, number][] = [
   [8,12],[13,78],[22,88],[6,45],[18,23],[30,67],[10,90],
@@ -12,6 +14,8 @@ export default function LandingAnimation({ onDone, completedCount = 3 }: { onDon
   const [phase, setPhase] = useState(0);
   // 0: 직원 대기  1: 비행기 강하  2: 착지 통통  3: 택시  4: 포옹/환호  완료
 
+  const { lang } = useLang();
+  const tr = t(lang);
   const mode = getSkyMode(new Date().getHours());
   const showStars = mode === "night" || mode === "dawn";
 
@@ -153,20 +157,20 @@ export default function LandingAnimation({ onDone, completedCount = 3 }: { onDon
           position: "absolute", top: "18%", left: "50%",
           transform: "translateX(-50%)",
           textAlign: "center", zIndex: 10,
-          whiteSpace: "nowrap",
+          width: "80%",
         }}>
           <div style={{ animation: "fadeInUp 0.5s ease 0.3s both" }}>
             <div style={{
-              fontSize: 16, fontWeight: 900, color: "white",
-              textShadow: "0 2px 16px rgba(0,0,0,0.5)",
-              background: "rgba(0,0,0,0.32)",
-              backdropFilter: "blur(12px)",
-              padding: "14px 20px", borderRadius: 16,
-              lineHeight: 1.7, textAlign: "center", maxWidth: 260,
+              fontSize: 15, fontWeight: 900, color: "white",
+              textShadow: "0 2px 8px rgba(0,0,0,0.6)",
+              background: "rgba(10,36,99,0.88)",
+              backdropFilter: "blur(16px)",
+              padding: "16px 20px", borderRadius: 16,
+              lineHeight: 1.8, textAlign: "center",
             }}>
-              우리는 늘 완벽하게 시작하지 못합니다.<br />
-              하지만 작은 행동 하나로 방향을 잡으면,<br />
-              <span style={{ color: "#6ee7e0" }}>망한 것 같던 하루도 잘 마무리 할 수 있어요.</span>
+              {tr.landingMsg1}<br />
+              {tr.landingMsg2}<br />
+              <span style={{ color: "#6ee7e0" }}>{tr.landingMsg3}</span>
             </div>
           </div>
         </div>
