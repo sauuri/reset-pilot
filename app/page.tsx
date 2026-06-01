@@ -232,7 +232,7 @@ export default function Home() {
           </div>
           <h1 style={{ fontSize: lang === "ko" ? 20 : 16, fontWeight: 900, lineHeight: 1.45, color: "white", margin: 0, textShadow: "0 2px 10px rgba(10,36,99,0.25)" }}>
             {tr.heroLine1}<br />
-            <span style={{ color: "#FFE066" }}>{tr.heroLine2}</span>
+            <span style={{ color: "#FFE066", whiteSpace: "nowrap" }}>{tr.heroLine2}</span>
           </h1>
           {streak >= 2 && (
             <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,160,0,0.18)", border: "1px solid rgba(255,160,0,0.35)", borderRadius: 20, padding: "3px 10px", whiteSpace: "nowrap" }}>
