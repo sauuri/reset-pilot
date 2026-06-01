@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script dangerouslySetInnerHTML={{ __html: skyInitScript }} />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full">
         <ScrollReset />
         <SkyBackground />
         <LangProvider>{children}</LangProvider>

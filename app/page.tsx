@@ -207,7 +207,7 @@ export default function Home() {
       </div>
     )}
 
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: "12px 14px 40px", visibility: (!initialized || loading || flightStatus === "arrived") ? "hidden" : "visible" }}>
+    <main style={{ width: "100%", maxWidth: 480, margin: "0 auto", padding: "12px 14px 40px", visibility: (!initialized || loading || flightStatus === "arrived") ? "hidden" : "visible" }}>
 
       {/* 헤더 */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 10 }}>
@@ -232,7 +232,7 @@ export default function Home() {
           </div>
           <h1 style={{ fontSize: 20, fontWeight: 900, lineHeight: 1.35, color: "white", margin: 0, textShadow: "0 2px 10px rgba(10,36,99,0.25)" }}>
             {tr.heroLine1}<br />
-            <span style={{ color: "#FFE066", whiteSpace: "nowrap" }}>{tr.heroLine2}</span>
+            <span style={{ color: "#FFE066" }}>{tr.heroLine2}</span>
           </h1>
           {streak >= 2 && (
             <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,160,0,0.18)", border: "1px solid rgba(255,160,0,0.35)", borderRadius: 20, padding: "3px 10px", whiteSpace: "nowrap" }}>
