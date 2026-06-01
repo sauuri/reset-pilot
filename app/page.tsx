@@ -231,7 +231,7 @@ export default function Home() {
             </span>
           </div>
           <h1 style={{ fontSize: lang === "ko" ? 20 : 16, fontWeight: 900, lineHeight: 1.45, color: "white", margin: 0, textShadow: "0 2px 10px rgba(10,36,99,0.25)" }}>
-            {tr.heroLine1}<br />
+            <span style={{ whiteSpace: "nowrap" }}>{tr.heroLine1}</span><br />
             <span style={{ color: "#FFE066", whiteSpace: "nowrap" }}>{tr.heroLine2}</span>
           </h1>
           {streak >= 2 && (
