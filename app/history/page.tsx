@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loadLogsFromSupabase, deleteLogsFromSupabase } from "../utils/logs";
 import { getCurrentBadge, getNextBadge, BADGES } from "../utils/badges";
+import { useLang } from "../utils/LangContext";
+import { t, T } from "../utils/i18n";
 
 interface LogEntry {
   date: string;
@@ -24,22 +26,18 @@ interface LogEntry {
 }
 
 function parseLogDate(dateStr: string): string {
-  // "2026. 5. 29." → "2026-05-29"
   const parts = dateStr.replace(/\.\s*/g, "-").replace(/-$/, "").split("-").map(s => s.trim().padStart(2, "0"));
   return parts.join("-");
 }
 
-function CalendarView({ log }: { log: LogEntry[] }) {
+function CalendarView({ log, tr }: { log: LogEntry[]; tr: T }) {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth()); // 0-indexed
+  const [month, setMonth] = useState(today.getMonth());
 
   const dateMap: Record<string, "better" | "same" | "worse" | "none"> = {};
   log.forEach(e => {
-    try {
-      const key = parseLogDate(e.date);
-      dateMap[key] = e.moodAfter ?? "none";
-    } catch { /* skip */ }
+    try { dateMap[parseLogDate(e.date)] = e.moodAfter ?? "none"; } catch { /* skip */ }
   });
 
   const firstDay = new Date(year, month, 1).getDay();
@@ -57,12 +55,12 @@ function CalendarView({ log }: { log: LogEntry[] }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <button onClick={() => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); }}
             style={{ background: "none", border: "none", color: "#7facca", fontSize: 18, cursor: "pointer", padding: "0 4px" }}>‹</button>
-          <span style={{ fontSize: 14, fontWeight: 800, color: "#1A1F36" }}>{year}년 {month + 1}월</span>
+          <span style={{ fontSize: 14, fontWeight: 800, color: "#1A1F36" }}>{tr.calYearMonth(year, month + 1)}</span>
           <button onClick={() => { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); }}
             style={{ background: "none", border: "none", color: "#7facca", fontSize: 18, cursor: "pointer", padding: "0 4px" }}>›</button>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 6 }}>
-          {["일","월","화","수","목","금","토"].map(d => (
+          {tr.calDays.map((d: string) => (
             <div key={d} style={{ textAlign: "center", fontSize: 10, color: "#9ab8cc", fontWeight: 700, paddingBottom: 4 }}>{d}</div>
           ))}
           {cells.map((day, i) => {
@@ -91,9 +89,9 @@ function CalendarView({ log }: { log: LogEntry[] }) {
           })}
         </div>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 6 }}>
-          {[["😊", "#1DB4A8", "나아짐"], ["😐", "#F59E0B", "비슷"], ["😔", "#E53935", "힘듦"], ["✓", "#5b9bd5", "기록"]].map(([emoji, color, label]) => (
+          {([["😊", "#1DB4A8", tr.calMoodBetter], ["😐", "#F59E0B", tr.calMoodSame], ["😔", "#E53935", tr.calMoodWorse], ["✓", "#5b9bd5", tr.calMoodDone]] as [string,string,string][]).map(([emoji, color, label]) => (
             <div key={label} style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 10, color: "#9ab8cc" }}>
-              <div style={{ width: 14, height: 14, borderRadius: "50%", background: color as string, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8 }}>{emoji}</div>
+              <div style={{ width: 14, height: 14, borderRadius: "50%", background: color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8 }}>{emoji}</div>
               {label}
             </div>
           ))}
@@ -105,6 +103,8 @@ function CalendarView({ log }: { log: LogEntry[] }) {
 
 export default function HistoryPage() {
   const router = useRouter();
+  const { lang, toggle: toggleLang } = useLang();
+  const tr = t(lang);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [selectMode, setSelectMode] = useState(false);
@@ -135,7 +135,7 @@ export default function HistoryPage() {
   }, []);
 
   function clearLog() {
-    if (confirm("기록을 전부 삭제할까요?")) {
+    if (confirm(tr.historyConfirmDeleteAll)) {
       const ids = log.map(e => e._id).filter(Boolean) as string[];
       if (ids.length > 0) deleteLogsFromSupabase(ids);
       localStorage.removeItem("resetLog");
@@ -161,7 +161,7 @@ export default function HistoryPage() {
 
   function deleteSelected() {
     if (selected.size === 0) return;
-    if (!confirm(`선택한 ${selected.size}개를 삭제할까요?`)) return;
+    if (!confirm(tr.historyConfirmDeleteSelected(selected.size))) return;
     const ids = [...selected].map(i => log[i]._id).filter(Boolean) as string[];
     if (ids.length > 0) deleteLogsFromSupabase(ids);
     const next = log.filter((_, i) => !selected.has(i));
@@ -177,17 +177,20 @@ export default function HistoryPage() {
   }
 
   return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: "32px 16px 80px" }}>
+    <main style={{ width: "100%", maxWidth: 480, margin: "0 auto", padding: "32px 16px 80px" }}>
 
       {/* 헤더 */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>
           <span className="flight-tag" style={{ marginBottom: 8, display: "inline-flex" }}>✈️ RESET PILOT</span>
           <h1 style={{ fontSize: 22, fontWeight: 900, color: "white", marginTop: 8, textShadow: "0 2px 8px rgba(10,36,99,0.25)" }}>
-            📋 복구 기록
+            {tr.historyPageTitle}
           </h1>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={toggleLang} style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)", color: "white", borderRadius: 9, padding: "6px 8px", fontSize: 11, cursor: "pointer", fontWeight: 800 }}>
+            {lang === "ko" ? "EN" : "한"}
+          </button>
           {log.length > 0 && (
             <button
               onClick={() => selectMode ? exitSelectMode() : setSelectMode(true)}
@@ -199,14 +202,14 @@ export default function HistoryPage() {
                 borderRadius: 10, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
               }}
             >
-              {selectMode ? "취소" : "선택"}
+              {selectMode ? tr.historySelectCancel : tr.historySelect}
             </button>
           )}
           <button
             onClick={() => router.push("/")}
             style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
           >
-            ← 홈
+            {tr.historyBackHome}
           </button>
         </div>
       </div>
@@ -223,7 +226,7 @@ export default function HistoryPage() {
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             }}
           >
-            📊 패턴 분석
+            {tr.historyInsightsBtn}
           </button>
           <button
             onClick={() => setViewMode(v => v === "list" ? "calendar" : "list")}
@@ -239,9 +242,9 @@ export default function HistoryPage() {
         </div>
       )}
 
-      {viewMode === "calendar" && log.length > 0 && <CalendarView log={log} />}
+      {viewMode === "calendar" && log.length > 0 && <CalendarView log={log} tr={tr} />}
 
-      {/* 나의 비행 기록 카드 */}
+      {/* 비행 기록 카드 */}
       {log.length > 0 && (() => {
         const total = log.length;
         const cur = getCurrentBadge(total);
@@ -252,7 +255,6 @@ export default function HistoryPage() {
         const to = next ? next.count : (cur?.count ?? 1);
         const progress = next ? Math.round(((total - from) / (to - from)) * 100) : 100;
 
-        // 등급별 색상
         const RANK_COLORS: Record<number, { border: string; glow: string; label: string }> = {
           1:   { border: "#CD7F32", glow: "rgba(205,127,50,0.35)",  label: "BRONZE"   },
           5:   { border: "#CD7F32", glow: "rgba(205,127,50,0.35)",  label: "BRONZE"   },
@@ -273,18 +275,18 @@ export default function HistoryPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                 <div>
                   <div style={{ fontSize: 32, lineHeight: 1, marginBottom: 4 }}>{cur?.emoji ?? "🛫"}</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: "white" }}>{cur?.name ?? "이륙 준비 중"}</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: "white" }}>{cur?.name ?? tr.historyBadgeReady}</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div className="gauge" style={{ fontSize: 42, fontWeight: 900, color: "#6ee7e0", lineHeight: 1 }}>{total}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>총 복구 횟수</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{tr.historyTotalCount}</div>
                 </div>
               </div>
               {next && (
                 <>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>다음: {next.emoji} {next.name}</span>
-                    <span style={{ fontSize: 11, color: "#6ee7e0", fontWeight: 700 }}>{next.count - total}회 남음</span>
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>{tr.nextBadgePrefix} {next.emoji} {next.name}</span>
+                    <span style={{ fontSize: 11, color: "#6ee7e0", fontWeight: 700 }}>{tr.historyNextIn(next.count - total)}</span>
                   </div>
                   <div style={{ height: 6, background: "rgba(255,255,255,0.15)", borderRadius: 3, overflow: "hidden" }}>
                     <div style={{ height: "100%", width: `${progress}%`, background: "linear-gradient(90deg, #6ee7e0, #1DB4A8)", borderRadius: 3, transition: "width 0.6s" }} />
@@ -292,7 +294,7 @@ export default function HistoryPage() {
                   <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textAlign: "right", marginTop: 4 }}>{total - from} / {to - from}</div>
                 </>
               )}
-              {!next && <div style={{ fontSize: 13, fontWeight: 800, color: "#6ee7e0", textAlign: "center", marginTop: 4 }}>🌌 레전드 파일럿 달성!</div>}
+              {!next && <div style={{ fontSize: 13, fontWeight: 800, color: "#6ee7e0", textAlign: "center", marginTop: 4 }}>{tr.historyBadgeLegend}</div>}
             </div>
 
             <div className="ticket-body" style={{ padding: "16px" }}>
@@ -310,7 +312,6 @@ export default function HistoryPage() {
                       position: "relative",
                       opacity: unlocked ? 1 : 0.5,
                     }}>
-                      {/* 등급 라벨 */}
                       <div style={{ background: unlocked ? rc.border : "rgba(165,210,238,0.2)", padding: "3px 0", textAlign: "center" }}>
                         <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: 1.5, color: unlocked ? "white" : "rgba(255,255,255,0.4)" }}>{rc.label}</span>
                       </div>
@@ -319,7 +320,7 @@ export default function HistoryPage() {
                           {unlocked ? b.emoji : "🔒"}
                         </div>
                         <div style={{ fontSize: 12, fontWeight: 900, color: unlocked ? "#0A2463" : "#9ab8cc", marginBottom: 3, lineHeight: 1.2 }}>{b.name}</div>
-                        <div style={{ fontSize: 10, color: unlocked ? "#4e6e82" : "#9ab8cc" }}>{b.count}회 달성</div>
+                        <div style={{ fontSize: 10, color: unlocked ? "#4e6e82" : "#9ab8cc" }}>{tr.historyBadgeCountLabel(b.count)}</div>
                       </div>
                     </div>
                   );
@@ -333,19 +334,18 @@ export default function HistoryPage() {
       {log.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0" }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div>
-          <div style={{ fontSize: 15, color: "rgba(255,255,255,0.8)", marginBottom: 8, fontWeight: 700 }}>아직 기록이 없어요.</div>
-          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", marginBottom: 28 }}>복구 플랜을 한 번 써보면 여기 쌓여요.</div>
+          <div style={{ fontSize: 15, color: "rgba(255,255,255,0.8)", marginBottom: 8, fontWeight: 700 }}>{tr.historyEmptyTitle}</div>
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", marginBottom: 28 }}>{tr.historyEmptySub}</div>
           <button onClick={() => router.push("/")} className="btn-primary" style={{ maxWidth: 220, margin: "0 auto" }}>
-            첫 복구 시작하기
+            {tr.startFirstRecovery}
           </button>
         </div>
       ) : (
         <>
-          {/* 통계 */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
-            <StatCard label="총 기록" value={`${log.length}일`}     color="#FF6B35" />
-            <StatCard label="평균 부담도" value={`${Math.round(log.reduce((s, l) => s + (l.ruinScore ?? 0), 0) / log.length)}%`} color="#E53935" />
-            <StatCard label="평균 회복" value={`${Math.round(log.reduce((s, l) => s + (l.recoverScore ?? 0), 0) / log.length)}%`} color="#1DB4A8" />
+            <StatCard label={tr.historyStatTotal} value={`${log.length}${tr.historyStatSuffix}`} color="#FF6B35" />
+            <StatCard label={tr.historyStatBurden} value={`${Math.round(log.reduce((s, l) => s + (l.ruinScore ?? 0), 0) / log.length)}%`} color="#E53935" />
+            <StatCard label={tr.historyStatRecover} value={`${Math.round(log.reduce((s, l) => s + (l.recoverScore ?? 0), 0) / log.length)}%`} color="#1DB4A8" />
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -375,18 +375,13 @@ export default function HistoryPage() {
                     <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                       {!selectMode && <button
                         onClick={e => { e.stopPropagation(); deleteEntry(i); }}
-                        style={{
-                          background: "none", border: "none", cursor: "pointer",
-                          fontSize: 15, color: "rgba(165,210,238,0.5)",
-                          padding: "2px 4px", lineHeight: 1,
-                          transition: "color 0.15s",
-                        }}
+                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 15, color: "rgba(165,210,238,0.5)", padding: "2px 4px", lineHeight: 1, transition: "color 0.15s" }}
                         onMouseEnter={e => (e.currentTarget.style.color = "#E53935")}
                         onMouseLeave={e => (e.currentTarget.style.color = "rgba(165,210,238,0.5)")}
-                        title="이 기록 삭제"
+                        title={tr.historyDeleteRecord}
                       >✕</button>}
-                      <span style={{ fontSize: 11, color: "#E53935", fontWeight: 700 }}>부담 {entry.ruinScore ?? "?"}%</span>
-                      <span style={{ fontSize: 11, color: "#1DB4A8", fontWeight: 700 }}>회복 {entry.recoverScore ?? "?"}%</span>
+                      <span style={{ fontSize: 11, color: "#E53935", fontWeight: 700 }}>{tr.historyBurden} {entry.ruinScore ?? "?"}%</span>
+                      <span style={{ fontSize: 11, color: "#1DB4A8", fontWeight: 700 }}>{tr.historyRecover} {entry.recoverScore ?? "?"}%</span>
                       {entry.completedCount !== undefined && (
                         <span style={{ fontSize: 11, color: "#F59E0B", fontWeight: 700 }}>✓ {entry.completedCount}/3</span>
                       )}
@@ -403,13 +398,7 @@ export default function HistoryPage() {
                   {entry.actions?.length > 0 && (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                       {entry.actions.slice(0, 3).map((a, j) => (
-                        <span key={j} style={{
-                          fontSize: 11, fontWeight: 600,
-                          background: "rgba(29,180,168,0.1)",
-                          border: "1px solid rgba(29,180,168,0.3)",
-                          borderRadius: 20, padding: "3px 10px",
-                          color: "#1DB4A8",
-                        }}>
+                        <span key={j} style={{ fontSize: 11, fontWeight: 600, background: "rgba(29,180,168,0.1)", border: "1px solid rgba(29,180,168,0.3)", borderRadius: 20, padding: "3px 10px", color: "#1DB4A8" }}>
                           {a.title}
                         </span>
                       ))}
@@ -417,7 +406,7 @@ export default function HistoryPage() {
                   )}
                   {entry.journal && (
                     <div style={{ marginTop: 10, padding: "8px 12px", background: "rgba(255,245,220,0.6)", borderRadius: 8, borderLeft: "3px solid #F59E0B" }}>
-                      <div style={{ fontSize: 9, color: "#F59E0B", fontWeight: 700, letterSpacing: 1, marginBottom: 3 }}>✏️ 오늘의 한 줄</div>
+                      <div style={{ fontSize: 9, color: "#F59E0B", fontWeight: 700, letterSpacing: 1, marginBottom: 3 }}>{tr.historyJournalLabel}</div>
                       <div style={{ fontSize: 12, color: "#4e6e82", lineHeight: 1.5, fontStyle: "italic" }}>"{entry.journal}"</div>
                     </div>
                   )}
@@ -428,25 +417,17 @@ export default function HistoryPage() {
 
           {selectMode ? (
             <div style={{ marginTop: 24, display: "flex", gap: 8 }}>
-              <button onClick={exitSelectMode} className="btn-ghost" style={{ flex: 1 }}>
-                취소
-              </button>
+              <button onClick={exitSelectMode} className="btn-ghost" style={{ flex: 1 }}>{tr.historySelectCancel}</button>
               <button
                 onClick={deleteSelected}
                 disabled={selected.size === 0}
-                style={{
-                  flex: 1, padding: "12px", borderRadius: 12, border: "none", cursor: selected.size > 0 ? "pointer" : "default",
-                  background: selected.size > 0 ? "#E53935" : "rgba(229,57,53,0.3)",
-                  color: "white", fontSize: 14, fontWeight: 800,
-                }}
+                style={{ flex: 1, padding: "12px", borderRadius: 12, border: "none", cursor: selected.size > 0 ? "pointer" : "default", background: selected.size > 0 ? "#E53935" : "rgba(229,57,53,0.3)", color: "white", fontSize: 14, fontWeight: 800 }}
               >
-                {selected.size > 0 ? `🗑 ${selected.size}개 삭제` : "항목을 선택하세요"}
+                {selected.size > 0 ? tr.historyDeleteSelected(selected.size) : tr.historySelectPrompt}
               </button>
             </div>
           ) : (
-            <button onClick={clearLog} className="btn-ghost" style={{ marginTop: 24 }}>
-              기록 전체 삭제
-            </button>
+            <button onClick={clearLog} className="btn-ghost" style={{ marginTop: 24 }}>{tr.historyDeleteAll}</button>
           )}
         </>
       )}

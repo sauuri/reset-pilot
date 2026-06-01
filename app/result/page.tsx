@@ -399,6 +399,7 @@ function ResultContent() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <span className="flight-tag">✈️ RESET PILOT</span>
         <div style={{ display: "flex", gap: 6 }}>
+          <button onClick={toggleLang} style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)", color: "white", borderRadius: 8, padding: "6px 8px", fontSize: 11, cursor: "pointer", fontWeight: 800 }}>{lang === "ko" ? "EN" : "한"}</button>
           {!isDemo && (
             <button onClick={toggleSave} style={{ background: saved ? "rgba(255,180,0,0.2)" : "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: `1px solid ${saved ? "rgba(255,180,0,0.4)" : "rgba(255,255,255,0.25)"}`, color: saved ? "#FFB830" : "rgba(255,255,255,0.6)", fontSize: 16, padding: "6px 10px", borderRadius: 8, cursor: "pointer" }} title={saved ? tr.r_saved : tr.r_savePlan}>
               {saved ? "⭐" : "☆"}
