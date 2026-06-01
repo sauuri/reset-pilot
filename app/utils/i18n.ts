@@ -434,7 +434,7 @@ export type T = typeof translations.ko;
 
 export function getLang(): Lang {
   if (typeof window === "undefined") return "ko";
-  return (localStorage.getItem("rp_lang") as Lang) || "ko";
+  return (localStorage.getItem("rp_lang") as Lang) || "en";
 }
 
 export function setLang(lang: Lang) {
