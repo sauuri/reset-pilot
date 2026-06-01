@@ -83,14 +83,14 @@ export default function SkyBackground() {
   const isWarm = mode === "sunset" || mode === "dawn";
 
   return (
-    <>
+    <div style={{ position:"fixed", inset:0, overflow:"hidden", pointerEvents:"none", zIndex:0 }}>
       {/* 하늘 */}
-      <div style={{ position:"fixed", inset:0, background:GRADIENTS[mode], zIndex:-1, pointerEvents:"none", transition:"background 5s ease" }} />
+      <div style={{ position:"absolute", inset:0, background:GRADIENTS[mode], zIndex:-1, transition:"background 5s ease" }} />
 
       {/* 별 */}
       {mode === "night" && STARS.map((s, i) => (
         <div key={i} style={{
-          position:"fixed", left:`${s.x}%`, top:`${s.y}%`,
+          position:"absolute", left:`${s.x}%`, top:`${s.y}%`,
           width:s.size, height:s.size, borderRadius:"50%",
           background: s.warm ? "#fff8cc" : "white",
           opacity: s.opacity,
@@ -104,7 +104,7 @@ export default function SkyBackground() {
 
       {/* 태양 */}
       {mode !== "night" && (
-        <div style={{ position:"fixed", left:`${sun.x}%`, top:`${sun.y}%`, transform:"translate(-50%,-50%)", zIndex:0, pointerEvents:"none" }}>
+        <div style={{ position:"absolute", left:`${sun.x}%`, top:`${sun.y}%`, transform:"translate(-50%,-50%)", zIndex:0, pointerEvents:"none" }}>
           <div style={{
             width: isWarm ? 66 : 52, height: isWarm ? 66 : 52, borderRadius:"50%",
             background: isWarm
@@ -119,7 +119,7 @@ export default function SkyBackground() {
 
       {/* 달 */}
       {mode === "night" && (
-        <div style={{ position:"fixed", left:`${moon.x}%`, top:`${moon.y}%`, transform:"translate(-50%,-50%)", zIndex:0, pointerEvents:"none" }}>
+        <div style={{ position:"absolute", left:`${moon.x}%`, top:`${moon.y}%`, transform:"translate(-50%,-50%)", zIndex:0, pointerEvents:"none" }}>
           <div style={{
             width:48, height:48, borderRadius:"50%",
             background:"radial-gradient(circle at 38% 38%, #f8fbff 0%, #dceaf8 40%, #bcd0ee 70%, #9ab8de 100%)",
@@ -164,7 +164,7 @@ export default function SkyBackground() {
         <Satellite top="8%"  duration="220s" delay="0s"   />
         <Satellite top="32%" duration="280s" delay="-110s" dim />
       </>}
-    </>
+    </div>
   );
 }
 
@@ -174,7 +174,7 @@ function NightPlane({ top, duration, delay, direction, small }: {
 }) {
   return (
     <div style={{
-      position: "fixed", top, zIndex: 2, pointerEvents: "none", opacity: 0,
+      position: "absolute", top, zIndex: 2, pointerEvents: "none", opacity: 0,
       display: "flex", alignItems: "center", gap: 1,
       animationName: direction === "lr" ? "plane-lr" : "plane-rl",
       animationDuration: duration,
@@ -218,7 +218,7 @@ function Satellite({ top, duration, delay, dim }: {
 }) {
   return (
     <div style={{
-      position: "fixed", top, zIndex: 1, pointerEvents: "none", opacity: 0,
+      position: "absolute", top, zIndex: 1, pointerEvents: "none", opacity: 0,
       width: dim ? 2 : 3, height: dim ? 2 : 3,
       borderRadius: "50%",
       background: dim ? "rgba(200,220,255,0.7)" : "rgba(220,235,255,0.9)",

@@ -76,7 +76,7 @@ body::before {
 
 /* 구름 */
 .cloud {
-  position: fixed;
+  position: absolute;
   pointer-events: none;
   z-index: 1;
   border-radius: 60px;
@@ -99,7 +99,7 @@ body::before {
 
 /* 비행기 */
 .plane {
-  position: fixed;
+  position: absolute;
   pointer-events: none;
   z-index: 2;
   font-size: 22px;
