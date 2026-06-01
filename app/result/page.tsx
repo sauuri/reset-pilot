@@ -8,6 +8,8 @@ import { getCurrentBadge, getNextBadge } from "../utils/badges";
 import { playCheck, playTimerDone, playBadge, playPop, playChime, playTap } from "../utils/sounds";
 import { hapticLight, hapticMedium, hapticHeavy, hapticSuccess } from "../utils/haptics";
 import { bridgeSetTimer, bridgeClearTimer } from "../utils/timerBridge";
+import { useLang } from "../utils/LangContext";
+import { t } from "../utils/i18n";
 
 interface Action {
   name: string;
@@ -89,6 +91,8 @@ interface TimerState { idx: number; total: number; remaining: number; done: bool
 
 function ResultContent() {
   const router = useRouter();
+  const { lang, toggle: toggleLang } = useLang();
+  const tr = t(lang);
   const searchParams = useSearchParams();
   const isDemo = searchParams.get("demo") === "true";
 
@@ -187,15 +191,15 @@ function ResultContent() {
 
   async function shareResult() {
     if (!result) return;
-    const moodText = moodAfter === "better" ? "😊 기분이 나아졌어요" : moodAfter === "same" ? "😐 비슷해요" : moodAfter === "worse" ? "😔 아직 힘들어요" : "";
+    const moodText = moodAfter === "better" ? tr.r_shareMoodBetter : moodAfter === "same" ? tr.r_shareMoodSame : moodAfter === "worse" ? tr.r_shareMoodWorse : "";
     const actionLines = result.actions.map((a, i) => `${checked[i] ? "✅" : "⬜"} ${a.title}`).join("\n");
-    const text = `✈️ Reset Pilot — 오늘 복구 기록\n${"─".repeat(22)}\n부담도 ${result.ruinScore}% → 흐름 되찾는 중\n\n${actionLines}\n${checkedCount > 0 ? `\n완료 ${checkedCount}/3 🎯` : ""}${moodText ? `\n${moodText}` : ""}\n\n#ResetPilot #망한하루복구`;
+    const text = tr.r_shareText(result.ruinScore, actionLines, checkedCount, moodText);
     try {
       if (navigator.share) {
         await navigator.share({ title: "Reset Pilot", text, url: "https://reset-pilot.vercel.app" });
       } else {
         await navigator.clipboard.writeText(text);
-        alert("클립보드에 복사됐어요!");
+        alert(tr.r_copied);
       }
     } catch { /* 취소 */ }
   }
@@ -237,18 +241,18 @@ function ResultContent() {
       <main style={{ maxWidth: 480, margin: "0 auto", padding: "80px 16px", textAlign: "center" }}>
         <div style={{ fontSize: 48, marginBottom: 20 }}>🛫</div>
         <div style={{ fontSize: 18, fontWeight: 900, color: "white", marginBottom: 10, textShadow: "0 2px 8px rgba(10,36,99,0.3)" }}>
-          아직 생성된 복구 리포트가 없어요.
+          {tr.r_noData}
         </div>
         <div style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.7, marginBottom: 32 }}>
-          먼저 현재 상태를 입력하면<br />
-          AI가 오늘 가능한 복구 플랜을 만들어드릴게요.
+          {tr.r_noDataSub1}<br />
+          {tr.r_noDataSub2}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 300, margin: "0 auto" }}>
           <button className="btn-primary" onClick={() => router.push("/")}>
-            ✈️ 복구 플랜 만들러 가기
+            {tr.r_goMake}
           </button>
           <button className="btn-ghost" onClick={() => router.push("/result?demo=true")}>
-            👀 샘플 리포트 보기
+            {tr.r_seeSample}
           </button>
         </div>
       </main>
@@ -307,7 +311,7 @@ function ResultContent() {
 
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 2, marginBottom: 8 }}>
-            {timer.done ? "MISSION COMPLETE" : "NOW FLYING"}
+            {timer.done ? tr.r_timerDone : tr.r_timerNow}
           </div>
           <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", fontWeight: 700, marginBottom: 4 }}>
             {result.actions[timer.idx].name}
@@ -340,7 +344,7 @@ function ResultContent() {
                 <div style={{ fontSize: 46, fontWeight: 900, color: "white", letterSpacing: -1, fontVariantNumeric: "tabular-nums" }}>
                   {fmt(timer.remaining)}
                 </div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>남음</div>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{tr.r_remaining}</div>
               </>
             )}
           </div>
@@ -349,7 +353,7 @@ function ResultContent() {
         {timer.done ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 300 }}>
             <div style={{ fontSize: 15, fontWeight: 800, color: "#1DB4A8", textAlign: "center", marginBottom: 4 }}>
-              시간 다 됐어요! 어떻게 됐나요?
+              {tr.r_timerAsk}
             </div>
             <button onClick={completeTimer} style={{
               padding: "14px", borderRadius: 14, border: "none", cursor: "pointer",
@@ -357,14 +361,14 @@ function ResultContent() {
               color: "white", fontSize: 15, fontWeight: 900,
               boxShadow: "0 6px 20px rgba(29,180,168,0.4)",
             }}>
-              ✅ 완료했어요!
+              {tr.r_done}
             </button>
             <button onClick={() => { bridgeClearTimer(); setTimer(null); }} style={{
               padding: "14px", borderRadius: 14, cursor: "pointer",
               background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)",
               color: "rgba(255,255,255,0.7)", fontSize: 14, fontWeight: 700,
             }}>
-              😅 못 했지만 괜찮아요
+              {tr.r_notDone}
             </button>
           </div>
         ) : (
@@ -375,14 +379,14 @@ function ResultContent() {
               color: "white", fontSize: 15, fontWeight: 900,
               boxShadow: "0 6px 20px rgba(29,180,168,0.4)",
             }}>
-              ✅ 벌써 완료했어요!
+              {tr.r_earlyDone}
             </button>
             <button onClick={() => { bridgeClearTimer(); setTimer(null); }} style={{
               padding: "14px", borderRadius: 14, cursor: "pointer",
               background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)",
               color: "rgba(255,255,255,0.6)", fontSize: 13, fontWeight: 700,
             }}>
-              ✕ 나중에 할게요
+              {tr.r_later}
             </button>
           </div>
         )}
@@ -396,12 +400,12 @@ function ResultContent() {
         <span className="flight-tag">✈️ RESET PILOT</span>
         <div style={{ display: "flex", gap: 6 }}>
           {!isDemo && (
-            <button onClick={toggleSave} style={{ background: saved ? "rgba(255,180,0,0.2)" : "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: `1px solid ${saved ? "rgba(255,180,0,0.4)" : "rgba(255,255,255,0.25)"}`, color: saved ? "#FFB830" : "rgba(255,255,255,0.6)", fontSize: 16, padding: "6px 10px", borderRadius: 8, cursor: "pointer" }} title={saved ? "저장됨" : "플랜 저장"}>
+            <button onClick={toggleSave} style={{ background: saved ? "rgba(255,180,0,0.2)" : "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: `1px solid ${saved ? "rgba(255,180,0,0.4)" : "rgba(255,255,255,0.25)"}`, color: saved ? "#FFB830" : "rgba(255,255,255,0.6)", fontSize: 16, padding: "6px 10px", borderRadius: 8, cursor: "pointer" }} title={saved ? tr.r_saved : tr.r_savePlan}>
               {saved ? "⭐" : "☆"}
             </button>
           )}
           <button onClick={() => router.push("/")} style={{ background: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.35)", color: "white", fontSize: 12, padding: "6px 12px", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}>
-            ← 다시 입력
+            {tr.r_reenterShort}
           </button>
         </div>
       </div>
@@ -422,13 +426,13 @@ function ResultContent() {
               }}>
                 {modeStyle.icon}
                 <span style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
-                  <span style={{ fontSize: 12, fontWeight: 800 }}>{modeStyle.label}</span>
+                  <span style={{ fontSize: 12, fontWeight: 800 }}>{tr.modeLabels[mode] ?? modeStyle.label}</span>
                   <span style={{ fontSize: 9, fontWeight: 600, opacity: 0.65 }}>{modeStyle.en}</span>
                 </span>
               </span>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginBottom: 2 }}>부담도</div>
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginBottom: 2 }}>{tr.r_ruin}</div>
               <div className="gauge" style={{ fontSize: 38, fontWeight: 900, color: modeStyle.color, lineHeight: 1 }}>{result.ruinScore}</div>
             </div>
           </div>
@@ -440,7 +444,7 @@ function ResultContent() {
         {/* 오늘 목표 */}
         <div className="ticket-body">
           <div style={{ marginBottom: 14 }}>
-            <div className="ticket-label">🎯 오늘의 목표</div>
+            <div className="ticket-label">{tr.r_goal}</div>
             <div style={{ fontSize: 15, fontWeight: 800, color: "#1A1F36", marginTop: 4, lineHeight: 1.5 }}>
               {result.recoveryGoal}
             </div>
@@ -450,18 +454,18 @@ function ResultContent() {
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
             <div style={{ textAlign: "center", minWidth: 44 }}>
               <div className="gauge" style={{ fontSize: 20, fontWeight: 900, color: "#E53935" }}>{result.scoreBefore}</div>
-              <div style={{ fontSize: 9, color: "#9ab8cc", marginTop: 1 }}>지금</div>
+              <div style={{ fontSize: 9, color: "#9ab8cc", marginTop: 1 }}>{tr.r_now}</div>
             </div>
             <div style={{ flex: 1, height: 6, background: "rgba(165,210,238,0.35)", borderRadius: 3, overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${result.scoreAfter}%`, background: "linear-gradient(90deg, #E53935, #1DB4A8)", borderRadius: 3 }} />
             </div>
             <div style={{ textAlign: "center", minWidth: 44 }}>
               <div className="gauge" style={{ fontSize: 20, fontWeight: 900, color: "#1DB4A8" }}>{result.scoreAfter}</div>
-              <div style={{ fontSize: 9, color: "#9ab8cc", marginTop: 1 }}>복구 후</div>
+              <div style={{ fontSize: 9, color: "#9ab8cc", marginTop: 1 }}>{tr.r_after}</div>
             </div>
           </div>
           <div style={{ fontSize: 10, color: "#9ab8cc", marginTop: 5, textAlign: "center" }}>
-            목표는 100점이 아니야 — 0점만 피하면 돼
+            {tr.r_scoreHint}
           </div>
         </div>
 
@@ -471,9 +475,9 @@ function ResultContent() {
         {/* 지금 할 일 3가지 */}
         <div className="ticket-stub">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <div className="ticket-label">⚡ 지금 할 일 3가지</div>
+            <div className="ticket-label">{tr.r_todo}</div>
             <div style={{ fontSize: 11, fontWeight: 700, color: allDone ? "#1DB4A8" : "#9ab8cc" }}>
-              {allDone ? "전부 완료 🎉" : `${checkedCount}/3`}
+              {allDone ? tr.r_allDone : `${checkedCount}/3`}
             </div>
           </div>
 
@@ -531,7 +535,7 @@ function ResultContent() {
                           borderRadius: 20, padding: "2px 8px", cursor: "pointer",
                           whiteSpace: "nowrap",
                         }}
-                      >⏱ 타이머</button>
+                      >{tr.r_timerBtn}</button>
                     )}
                   </div>
                 </div>
@@ -551,9 +555,9 @@ function ResultContent() {
               borderRadius: 10, fontSize: 13, fontWeight: 700, color: "#1DB4A8",
               transition: "background 0.3s, border-color 0.3s",
             }}>
-              {checkedCount === 1 && "✓ 오늘은 0점은 아니에요."}
-              {checkedCount === 2 && "✓✓ 흐름이 조금 돌아오고 있어요."}
-              {checkedCount === 3 && "🛬 복구 완료. 오늘 충분히 잘 막았어요."}
+              {checkedCount === 1 && tr.r_check1}
+              {checkedCount === 2 && tr.r_check2}
+              {checkedCount === 3 && tr.r_check3}
             </div>
           )}
         </div>
@@ -565,7 +569,7 @@ function ResultContent() {
         <div className="ticket-stub" style={{ padding: "12px 20px" }}>
           <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
             <div style={{ flex: 1 }}>
-              <div className="ticket-label">성공 기준</div>
+              <div className="ticket-label">{tr.r_success}</div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1F36", marginTop: 3, lineHeight: 1.5 }}>
                 {result.successCriteria}
               </div>
@@ -576,7 +580,7 @@ function ResultContent() {
             <div className="barcode" style={{ width: 56, flexShrink: 0, marginTop: 4 }} />
           </div>
           <div style={{ marginTop: 8, fontSize: 9, color: "#b8d5e8", letterSpacing: 1 }}>
-            RST-001 · {modeStyle.label} · GATE 3 · TODAY
+            RST-001 · {tr.modeLabels[mode] ?? modeStyle.label} · GATE 3 · TODAY
           </div>
         </div>
       </div>
@@ -585,12 +589,12 @@ function ResultContent() {
       {anyDone && (
         <div className="ticket animate-fadeInUp" style={{ marginBottom: 14 }}>
           <div className="ticket-body" style={{ padding: "16px 20px" }}>
-            <div className="ticket-label" style={{ marginBottom: 10 }}>💬 지금 기분은?</div>
+            <div className="ticket-label" style={{ marginBottom: 10 }}>{tr.r_moodTitle}</div>
             <div style={{ display: "flex", gap: 8 }}>
               {([
-                { value: "better" as const, emoji: "😊", label: "나아짐" },
-                { value: "same"   as const, emoji: "😐", label: "비슷" },
-                { value: "worse"  as const, emoji: "😔", label: "더 힘듦" },
+                { value: "better" as const, emoji: "😊", label: tr.r_moodBetter },
+                { value: "same"   as const, emoji: "😐", label: tr.r_moodSame },
+                { value: "worse"  as const, emoji: "😔", label: tr.r_moodWorse },
               ]).map(({ value, emoji, label }) => (
                 <button
                   key={value}
@@ -612,9 +616,9 @@ function ResultContent() {
             </div>
             {moodAfter && (
               <div style={{ marginTop: 10, fontSize: 12, color: "#1DB4A8", fontWeight: 700, textAlign: "center" }}>
-                {moodAfter === "better" && "✓ 기록됐어요. 좋은 흐름이에요!"}
-                {moodAfter === "same"   && "✓ 기록됐어요. 그래도 오늘 버텼어요."}
-                {moodAfter === "worse"  && "✓ 기록됐어요. 솔직하게 알려줘서 고마워요."}
+                {moodAfter === "better" && tr.r_moodRecBetter}
+                {moodAfter === "same"   && tr.r_moodRecSame}
+                {moodAfter === "worse"  && tr.r_moodRecWorse}
               </div>
             )}
           </div>
@@ -625,21 +629,21 @@ function ResultContent() {
       {!isDemo && (
         <div className="ticket animate-fadeInUp" style={{ marginBottom: 14 }}>
           <div className="ticket-header" style={{ padding: "12px 20px" }}>
-            <div className="ticket-label" style={{ color: "rgba(255,255,255,0.5)" }}>✏️ 오늘의 한 줄</div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>잘 한 것 하나, 또는 오늘을 한 마디로 — 아주 작아도 괜찮아요</div>
+            <div className="ticket-label" style={{ color: "rgba(255,255,255,0.5)" }}>{tr.r_journalTitle}</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>{tr.r_journalSub}</div>
           </div>
           <div className="ticket-body" style={{ padding: "14px 20px" }}>
             {journalSaved ? (
               <div style={{ padding: "12px 14px", background: "rgba(255,245,220,0.7)", borderRadius: 10, borderLeft: "3px solid #F59E0B" }}>
                 <div style={{ fontSize: 9, color: "#F59E0B", fontWeight: 700, letterSpacing: 1, marginBottom: 4 }}>TODAY&apos;S NOTE</div>
                 <div style={{ fontSize: 13, color: "#4e6e82", lineHeight: 1.6, fontStyle: "italic" }}>"{journal}"</div>
-                <button onClick={() => setJournalSaved(false)} style={{ marginTop: 8, background: "none", border: "none", fontSize: 11, color: "#9ab8cc", cursor: "pointer" }}>수정하기</button>
+                <button onClick={() => setJournalSaved(false)} style={{ marginTop: 8, background: "none", border: "none", fontSize: 11, color: "#9ab8cc", cursor: "pointer" }}>{tr.r_journalEdit}</button>
               </div>
             ) : (
               <>
                 <textarea
                   rows={2}
-                  placeholder="물 한 잔 마셨다 / 오늘 버텼다 / 조금 나아진 것 같다…"
+                  placeholder={tr.r_journalPlaceholder}
                   value={journal}
                   onChange={e => setJournal(e.target.value)}
                   style={{ width: "100%", resize: "none", fontSize: 13, borderRadius: 10, border: "1.5px solid rgba(245,158,11,0.35)", background: "rgba(255,251,235,0.6)", padding: "10px 12px", color: "#4e6e82", outline: "none" }}
@@ -649,7 +653,7 @@ function ResultContent() {
                   disabled={!journal.trim()}
                   style={{ marginTop: 8, width: "100%", padding: "11px", borderRadius: 10, border: "none", cursor: journal.trim() ? "pointer" : "default", background: journal.trim() ? "linear-gradient(135deg, #F59E0B, #d97706)" : "rgba(245,158,11,0.15)", color: journal.trim() ? "white" : "#9ab8cc", fontSize: 13, fontWeight: 800, transition: "all 0.2s" }}
                 >
-                  ✏️ 저장하기
+                  {tr.r_journalSave}
                 </button>
               </>
             )}
@@ -660,17 +664,17 @@ function ResultContent() {
       {/* 현실 체크 */}
       <div className="ticket animate-fadeInUp animate-delay-1" style={{ marginBottom: 14 }}>
         <div className="ticket-header" style={{ padding: "12px 20px" }}>
-          <div className="ticket-label" style={{ color: "rgba(255,255,255,0.5)" }}>🧠 감정 vs 사실 — AI 분석</div>
+          <div className="ticket-label" style={{ color: "rgba(255,255,255,0.5)" }}>{tr.r_emotionTitle}</div>
         </div>
         <div className="ticket-body">
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ padding: "10px 14px", background: "rgba(255,245,245,0.75)", borderRadius: 10, border: "1px solid rgba(255,205,210,0.5)" }}>
-              <div style={{ fontSize: 9, color: "#E53935", fontWeight: 700, letterSpacing: 1, marginBottom: 3 }}>지금 느끼는 것</div>
+              <div style={{ fontSize: 9, color: "#E53935", fontWeight: 700, letterSpacing: 1, marginBottom: 3 }}>{tr.r_feelNow}</div>
               <div style={{ fontSize: 13, color: "#6B7494", fontStyle: "italic" }}>&ldquo;{result.emotionFact.emotion}&rdquo;</div>
             </div>
-            <div className="runway-divider">AI가 걸러낸 사실</div>
+            <div className="runway-divider">{tr.r_aiFiltered}</div>
             <div style={{ padding: "10px 14px", background: "rgba(240,253,252,0.75)", borderRadius: 10, border: "1px solid rgba(153,246,228,0.5)" }}>
-              <div style={{ fontSize: 9, color: "#1DB4A8", fontWeight: 700, letterSpacing: 1, marginBottom: 3 }}>실제로는</div>
+              <div style={{ fontSize: 9, color: "#1DB4A8", fontWeight: 700, letterSpacing: 1, marginBottom: 3 }}>{tr.r_actually}</div>
               <div style={{ fontSize: 13, color: "#1A1F36" }}>{result.emotionFact.fact}</div>
             </div>
             {result.emotionFact.interpret && (
@@ -685,7 +689,7 @@ function ResultContent() {
       {/* 오늘 안 해도 되는 것 */}
       <div className="ticket animate-fadeInUp animate-delay-2" style={{ marginBottom: 16 }}>
         <div className="ticket-header" style={{ padding: "12px 20px" }}>
-          <div className="ticket-label" style={{ color: "rgba(255,255,255,0.5)" }}>🗑️ 오늘 안 해도 되는 것</div>
+          <div className="ticket-label" style={{ color: "rgba(255,255,255,0.5)" }}>{tr.r_skipTitle}</div>
         </div>
         <div className="ticket-body">
           <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
@@ -701,9 +705,9 @@ function ResultContent() {
 
       {isDemo && (
         <div style={{ marginBottom: 14, padding: "12px 16px", background: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.35)", textAlign: "center" }}>
-          <div style={{ fontSize: 12, color: "white", fontWeight: 700, marginBottom: 6 }}>👀 샘플 리포트입니다</div>
+          <div style={{ fontSize: 12, color: "white", fontWeight: 700, marginBottom: 6 }}>{tr.r_sampleNote}</div>
           <button className="btn-primary" style={{ fontSize: 13, padding: "10px 20px" }} onClick={() => router.push("/")}>
-            ✈️ 내 복구 플랜 만들기
+            {tr.r_makeMyPlan}
           </button>
         </div>
       )}
@@ -732,20 +736,16 @@ function ResultContent() {
           onMouseDown={e => (e.currentTarget.style.transform = "translateY(2px)")}
           onMouseUp={e => (e.currentTarget.style.transform = "translateY(0)")}
         >
-          {checkedCount === 3
-            ? "🛬 착륙하기 — 오늘 수고했어!"
-            : checkedCount === 2
-            ? "🛬 착륙 — 오늘 꽤 잘 막았어"
-            : "🛬 비상착륙 — 일단 오늘 내려와"}
+          {checkedCount === 3 ? tr.r_land3 : checkedCount === 2 ? tr.r_land2 : tr.r_land1}
         </button>
       ) : (
         <button className="btn-primary animate-fadeInUp animate-delay-3" onClick={() => router.push("/")}>
-          ✈️ 다시 입력하기
+          {tr.r_reenter}
         </button>
       )}
       <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
         <button className="btn-ghost" style={{ flex: 1 }} onClick={() => router.push("/history")}>
-          📋 기록 보기
+          {tr.r_historyBtn}
         </button>
         <button
           onClick={shareResult}
@@ -756,7 +756,7 @@ function ResultContent() {
             color: "white", fontSize: 13, fontWeight: 700,
           }}
         >
-          🔗 공유하기
+          {tr.r_shareBtn}
         </button>
       </div>
 
@@ -767,10 +767,10 @@ function ResultContent() {
           borderRadius: 14, border: "1px solid rgba(229,57,53,0.25)",
         }}>
           <div style={{ fontSize: 11, color: "#E53935", fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>
-            🆘 위기 상황이라면
+            {tr.r_crisisTitle}
           </div>
           <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, marginBottom: 10 }}>
-            지금 너무 힘들고 혼자 감당이 안 된다면, 전화 한 통이 도움이 될 수 있어요.
+            {tr.r_crisisDesc}
           </div>
           <a href="tel:1393" style={{ display: "block", textDecoration: "none" }}>
             <div style={{
@@ -780,8 +780,8 @@ function ResultContent() {
             }}>
               <span style={{ fontSize: 22 }}>📞</span>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 900, color: "#ff6b6b" }}>자살예방상담전화 1393</div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 1 }}>24시간 무료 · 익명 가능</div>
+                <div style={{ fontSize: 14, fontWeight: 900, color: "#ff6b6b" }}>{tr.r_crisisCall}</div>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 1 }}>{tr.r_crisisCallSub}</div>
               </div>
             </div>
           </a>
